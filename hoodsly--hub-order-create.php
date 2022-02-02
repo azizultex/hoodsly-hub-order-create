@@ -139,7 +139,7 @@ final class HoodslyHub{
 /**
  * initialise the main function
  *
- * @return void
+ * @return false|HoodslyHub
  */
 function hoodsly_hub()
 {
