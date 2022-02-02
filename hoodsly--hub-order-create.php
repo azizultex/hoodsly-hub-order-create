@@ -25,7 +25,6 @@ final class HoodslyHub{
 
     public function __construct(){
         add_action('woocommerce_thankyou', [$this, 'send_order_data'], 10, 1);
-        // add_action('admin_init', [$this, 'test']);
     }
 	/**
      * init function for single tone approach
@@ -110,7 +109,12 @@ final class HoodslyHub{
             ]
         ];
 
-        $rest_api_url = "https://hoodslyhub.com/wp-json/order-data/v1/hub";
+	    if ( defined( 'WP_DEBUG' ) ) {
+		    $api_url = "http://hoodslyhub.test/wp-json/order-data/v1/hub";
+	    }else{
+		    $api_url = "https://hoodslyhub.com/wp-json/order-data/v1/hub";
+	    }
+        $rest_api_url = $api_url;
         $host = parse_url(get_site_url(), PHP_URL_HOST);
         $domains = explode('.', $host);
 
