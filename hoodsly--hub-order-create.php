@@ -128,13 +128,13 @@ final class HoodslyHub{
             ]
         ];
 
-        $rest_api_url = "http://localhost/hoodsly_hub/wp-json/order-data/v1/hub";
-	    if ( defined( 'DEV_REST_API' ) ) {
-		    $api_url = DEV_REST_API;
+
+	    if ( defined( 'WP_DEBUG' ) ) {
+		    $api_url = DEV_ORDER_REST_API;
 	    }else{
 		    $api_url = "https://hoodslyhub.com/wp-json/order-data/v1/hub";
 	    }
-        $rest_api_url = 'http://localhost/hoodsly_hub/wp-json/order-data/v1/hub';
+        $rest_api_url = $api_url;
         $host = parse_url(get_site_url(), PHP_URL_HOST);
         //$domains = explode('.', $host);
 
