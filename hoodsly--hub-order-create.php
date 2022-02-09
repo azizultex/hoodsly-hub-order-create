@@ -32,6 +32,8 @@ final class HoodslyHub{
         $data = $order->get_data();
         $order_date = $order->order_date;
         $order_status  = $order->get_status();
+        $status_label = wc_get_order_status_name( $order_status );
+        write_log($string);
         $line_items['order_total'] = $order->get_total();
         foreach ( $order->get_items() as  $item_key => $item_values ) {
             //write_log($item_values);
@@ -87,11 +89,18 @@ final class HoodslyHub{
 
     public function send_order_data( $order_id ){
         $order = wc_get_order($order_id);
-        
+
+        $order_history = wc_get_order_notes( array(
+            'order_id' => $order_id,
+           'orderby'  => 'date_created_gmt',
+          ) );
+        $order_summery = json_decode(json_encode($order_history), true);
+
         $line_items = array();
         $data = $order->get_data();
         $order_date = $order->order_date;
         $order_status  = $order->get_status();
+        $order_status = wc_get_order_status_name( $order_status );
         $line_items['order_total'] = $order->get_total();
         foreach ( $order->get_items() as  $item_key => $item_values ) {
             //write_log($item_values);
@@ -206,6 +215,7 @@ final class HoodslyHub{
             'product_sku'   => $item_sku,
             'order_status'   => $order_status,
             'custom_color_match'   => $custom_color_match,
+            'order_summery' => $order_summery,
         ]);
 
         wp_remote_post( $rest_api_url, array(
