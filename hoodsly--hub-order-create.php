@@ -23,7 +23,7 @@ final class HoodslyHub{
 
     public function __construct(){
         add_action('woocommerce_thankyou', [$this, 'send_order_data'], 10, 1);
-        add_action('admin_init', [$this, 'test_order_data']);
+        //add_action('admin_init', [$this, 'test_order_data']);
     }
 
     function test_order_data(){
