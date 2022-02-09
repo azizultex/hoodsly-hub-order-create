@@ -33,11 +33,15 @@ final class HoodslyHub{
         $order_date = $order->order_date;
         $order_status  = $order->get_status();
         $status_label = wc_get_order_status_name( $order_status );
-        write_log($string);
+        
+
         $line_items['order_total'] = $order->get_total();
         foreach ( $order->get_items() as  $item_key => $item_values ) {
             //write_log($item_values);
             $product = wc_get_product($item_values->get_product_id());
+
+            $product_img_url = wp_get_attachment_url( $product->get_image_id() );
+            
             $item_sku = $product->get_sku();
             $item_data = $item_values->get_data();
             $new_arr = [];
@@ -63,6 +67,7 @@ final class HoodslyHub{
             $round   = false; // Not rounded at item level ("true"  for rounding at item level)
             $product_name = $item_values['name'];
             $new_arr['product_id'] = $item_data['product_id'];
+            $new_arr['product_img_url'] = $product_img_url;
             $new_arr['item_total'] = $order->get_line_total( $item_values, $inc_tax, $round );
             $new_arr['item_total_tax'] = $order->get_line_tax($item_values);
             $new_arr['product_name'] = $item_data['name'];
@@ -71,7 +76,7 @@ final class HoodslyHub{
             $new_arr['order_meta'] = $formatted_meta_data;
             $line_items['line_items'][] = $new_arr;
         }
-        //write_log($line_items);
+        write_log($line_items);
     }
 
 	/**
@@ -105,6 +110,7 @@ final class HoodslyHub{
         foreach ( $order->get_items() as  $item_key => $item_values ) {
             //write_log($item_values);
             $product = wc_get_product($item_values->get_product_id());
+            $product_img_url = wp_get_attachment_url( $product->get_image_id() );
             $item_sku = $product->get_sku();
             $item_data = $item_values->get_data();
             $new_arr = [];
@@ -129,6 +135,7 @@ final class HoodslyHub{
             $round   = false; // Not rounded at item level ("true"  for rounding at item level)
             $product_name = $item_values['name'];
             $new_arr['product_id'] = $item_data['product_id'];
+            $new_arr['product_img_url'] = $product_img_url;
             $new_arr['product_name'] = $item_data['name'];
             $new_arr['item_total'] = $order->get_line_total( $item_values, $inc_tax, $round );
             $new_arr['item_total_tax'] = $order->get_line_tax($item_values);
