@@ -23,6 +23,53 @@ final class HoodslyHub{
 
     public function __construct(){
         add_action('woocommerce_thankyou', [$this, 'send_order_data'], 10, 1);
+        add_action('admin_init', [$this, 'test_order_data']);
+    }
+
+    function test_order_data(){
+        $order = wc_get_order(26333);
+        $line_items = array();
+        $data = $order->get_data();
+        $order_date = $order->order_date;
+        $order_status  = $order->get_status();
+        $line_items['order_total'] = $order->get_total();
+        foreach ( $order->get_items() as  $item_key => $item_values ) {
+            //write_log($item_values);
+            $product = wc_get_product($item_values->get_product_id());
+            $item_sku = $product->get_sku();
+            $item_data = $item_values->get_data();
+            $new_arr = [];
+            $item_meta_data = $item_values->get_meta_data();
+            $formatted_meta_data = $item_values->get_formatted_meta_data( '_', true );
+
+            foreach($item_data['meta_data'] as $key => $value){
+                
+                if($value->get_data()['key'] == 'pa_color'){
+                    if($value->get_data()['value'] == 'custom-color-match'){
+                        $custom_color_match = true;
+                    }
+                }
+            }
+        
+
+            $terms = get_the_terms( $item_data['product_id'], 'product_cat' );
+            foreach ( $terms as $term ) {
+                // Categories by slug
+                $product_cat_slug= $term->slug;
+            }
+            $inc_tax = true; 
+            $round   = false; // Not rounded at item level ("true"  for rounding at item level)
+            $product_name = $item_values['name'];
+            $new_arr['product_id'] = $item_data['product_id'];
+            $new_arr['item_total'] = $order->get_line_total( $item_values, $inc_tax, $round );
+            $new_arr['item_total_tax'] = $order->get_line_tax($item_values);
+            $new_arr['product_name'] = $item_data['name'];
+            $new_arr['variation_id'] = $item_data['variation_id'];
+            $new_arr['quantity'] = $item_data['quantity'];
+            $new_arr['order_meta'] = $formatted_meta_data;
+            $line_items['line_items'][] = $new_arr;
+        }
+        //write_log($line_items);
     }
 
 	/**
@@ -45,6 +92,7 @@ final class HoodslyHub{
         $data = $order->get_data();
         $order_date = $order->order_date;
         $order_status  = $order->get_status();
+        $line_items['order_total'] = $order->get_total();
         foreach ( $order->get_items() as  $item_key => $item_values ) {
             //write_log($item_values);
             $product = wc_get_product($item_values->get_product_id());
@@ -68,13 +116,17 @@ final class HoodslyHub{
                 // Categories by slug
                 $product_cat_slug= $term->slug;
             }
+            $inc_tax = true; 
+            $round   = false; // Not rounded at item level ("true"  for rounding at item level)
             $product_name = $item_values['name'];
             $new_arr['product_id'] = $item_data['product_id'];
             $new_arr['product_name'] = $item_data['name'];
+            $new_arr['item_total'] = $order->get_line_total( $item_values, $inc_tax, $round );
+            $new_arr['item_total_tax'] = $order->get_line_tax($item_values);
             $new_arr['variation_id'] = $item_data['variation_id'];
             $new_arr['quantity'] = $item_data['quantity'];
             $new_arr['order_meta'] = $formatted_meta_data;
-            $line_items[] = $new_arr;
+            $line_items['line_items'][] = $new_arr;
         }
         foreach( $order->get_items( 'shipping' ) as $item_id => $item ){
             /* $order_item_name             = $item->get_name();
