@@ -23,18 +23,20 @@ final class HoodslyHub{
 
     public function __construct(){
         add_action('woocommerce_thankyou', [$this, 'send_order_data'], 10, 1);
-        //add_action('admin_init', [$this, 'test_order_data']);
+        add_action('admin_init', [$this, 'test_order_data']);
     }
 
     function test_order_data(){
-        $order = wc_get_order(26333);
+        $order = wc_get_order(26347);
+
         $line_items = array();
         $data = $order->get_data();
         $order_date = $order->order_date;
         $order_status  = $order->get_status();
         $status_label = wc_get_order_status_name( $order_status );
-        
 
+
+		write_log($bill_of_landing_id);
         $line_items['order_total'] = $order->get_total();
         foreach ( $order->get_items() as  $item_key => $item_values ) {
             //write_log($item_values);
@@ -76,7 +78,6 @@ final class HoodslyHub{
             $new_arr['order_meta'] = $formatted_meta_data;
             $line_items['line_items'][] = $new_arr;
         }
-        write_log($line_items);
     }
 
 	/**
@@ -208,11 +209,12 @@ final class HoodslyHub{
 
         $data_string = json_encode([
             'title'    => '#'.$order_id.'',
-            'order_id'    => $order_id,
+            'order_id'    => intval($order_id),
             'data' => $details_data,
             'content'  => '#'.$order_id.'<br>'.$data['shipping']['first_name'].' '.$data['billing']['last_name'].'<br>'.$data['billing']['email'].'<br>'.$data['billing']['phone'].'<br>'. $data['shipping']['address_1'] . $data['shipping']['address_2']. ' ,'. $data['shipping']['city'].' ,'. $data['shipping']['state'].' '.$data['shipping']['postcode'].'',
             'status'   => 'publish',
             'estimated_shipping_date' => get_post_meta($order_id,'estimated_shipping_date', true),
+	        'bill_of_landing_id' => get_post_meta($order_id,'bill_of_landing_id', true),
             'origin'   => $host,
             'order_date'   => $order_date,
             'meta_data'   => $formatted_meta_data,
