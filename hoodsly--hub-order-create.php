@@ -23,11 +23,11 @@ final class HoodslyHub {
 
 	public function __construct() {
 		add_action( 'woocommerce_thankyou', [ $this, 'send_order_data' ], 10, 1 );
-		//add_action('admin_init', [$this, 'test_order_data']);
+		//add_action( 'admin_init', [ $this, 'test_order_data' ] );
 	}
 
 	function test_order_data() {
-		$order = wc_get_order( 26347 );
+		$order = wc_get_order( 26406 );
 
 		$line_items   = array();
 		$data         = $order->get_data();
@@ -52,11 +52,22 @@ final class HoodslyHub {
 //	        }
 
 
-			$item_sku            = $product->get_sku();
-			$item_data           = $item_values->get_data();
-			$new_arr             = [];
-			$item_meta_data      = $item_values->get_meta_data();
-			$formatted_meta_data = $item_values->get_formatted_meta_data( '_', true );
+			$item_sku               = $product->get_sku();
+			$item_data              = $item_values->get_data();
+			$new_arr                = [];
+			$item_meta_data         = $item_values->get_meta_data();
+			$formatted_meta_data    = $item_values->get_formatted_meta_data( '_', true );
+			$array                  = json_decode( json_encode( $formatted_meta_data ), true );
+			$reference_for_customer = '';
+			foreach ( $array as $value ) {
+				if ( $value['key'] === 'reference_for_customer' ) {
+					$reference_for_customer = $value['value'];
+				}
+			}
+
+			$line_items['reference_for_customer'] = $reference_for_customer;
+
+			//write_log( $line_items );
 
 			foreach ( $item_data['meta_data'] as $key => $value ) {
 
@@ -68,11 +79,13 @@ final class HoodslyHub {
 			}
 
 
-			$terms = get_the_terms( $item_data['product_id'], 'product_cat' );
+			$terms            = get_the_terms( $item_data['product_id'], 'product_cat' );
+			$product_cat_slug = [];
 			foreach ( $terms as $term ) {
 				// Categories by slug
-				$product_cat_slug = $term->slug;
+				$product_cat_slug[] = $term->slug;
 			}
+
 			$inc_tax                    = true;
 			$round                      = false; // Not rounded at item level ("true"  for rounding at item level)
 			$product_name               = $item_values['name'];
@@ -81,11 +94,14 @@ final class HoodslyHub {
 			$new_arr['item_total']      = $order->get_line_total( $item_values, $inc_tax, $round );
 			$new_arr['item_total_tax']  = $order->get_line_tax( $item_values );
 			$new_arr['product_name']    = $item_data['name'];
+			$new_arr['product_cat']     = $product_cat_slug;
 			$new_arr['variation_id']    = $item_data['variation_id'];
 			$new_arr['quantity']        = $item_data['quantity'];
 			$new_arr['order_meta']      = $formatted_meta_data;
 			$line_items['line_items'][] = $new_arr;
 		}
+		$line_items['product_cat'] = $product_cat_slug;
+		write_log($line_items);
 	}
 
 	/**
@@ -119,10 +135,10 @@ final class HoodslyHub {
 		$line_items['order_total'] = $order->get_total();
 		foreach ( $order->get_items() as $item_key => $item_values ) {
 
-			$product       = wc_get_product( $item_values->get_product_id() );
-			$product_image = apply_filters( 'woocommerce_order_item_product', $order->get_product_from_item( $item_values ), $item_values );
+			$product           = wc_get_product( $item_values->get_product_id() );
+			$product_image     = apply_filters( 'woocommerce_order_item_product', $order->get_product_from_item( $item_values ), $item_values );
 			$product_image_url = $product_image->get_image();
-			$pattern = "/(?:(?:https?|ftp|file):\/\/|www\.|ftp\.)(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[-A-Z0-9+&@#\/%=~_|$?!:,.])*(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[A-Z0-9+&@#\/%=~_|$])/i";
+			$pattern           = "/(?:(?:https?|ftp|file):\/\/|www\.|ftp\.)(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[-A-Z0-9+&@#\/%=~_|$?!:,.])*(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[A-Z0-9+&@#\/%=~_|$])/i";
 			preg_match_all( $pattern, $product_image_url, $matches );
 			$product_img_url = $matches[0][0];
 
@@ -132,6 +148,21 @@ final class HoodslyHub {
 			$new_arr             = [];
 			$item_meta_data      = $item_values->get_meta_data();
 			$formatted_meta_data = $item_values->get_formatted_meta_data( '_', true );
+			write_log( $formatted_meta_data );
+			$formatted_meta_data_array = json_decode( json_encode( $formatted_meta_data ), true );
+			$reference_for_customer    = '';
+			$sku                       = '';
+
+			foreach ( $formatted_meta_data_array as $value ) {
+				if ( $value['key'] === 'SKU' ) {
+					$sku = $value['value'];
+				}
+			}
+			foreach ( $formatted_meta_data_array as $value ) {
+				if ( $value['key'] === 'reference_for_customer' ) {
+					$reference_for_customer = $value['value'];
+				}
+			}
 
 			foreach ( $item_data['meta_data'] as $key => $value ) {
 
@@ -142,23 +173,28 @@ final class HoodslyHub {
 				}
 			}
 
-			$terms = get_the_terms( $item_data['product_id'], 'product_cat' );
+			$terms            = get_the_terms( $item_data['product_id'], 'product_cat' );
+			$product_cat_slug = [];
 			foreach ( $terms as $term ) {
 				// Categories by slug
 				$product_cat_slug = $term->slug;
 			}
-			$inc_tax                    = true;
-			$round                      = false; // Not rounded at item level ("true"  for rounding at item level)
-			$product_name               = $item_values['name'];
-			$new_arr['product_id']      = $item_data['product_id'];
-			$new_arr['product_img_url'] = $product_img_url;
-			$new_arr['product_name']    = $item_data['name'];
-			$new_arr['item_total']      = $order->get_line_total( $item_values, $inc_tax, $round );
-			$new_arr['item_total_tax']  = $order->get_line_tax( $item_values );
-			$new_arr['variation_id']    = $item_data['variation_id'];
-			$new_arr['quantity']        = $item_data['quantity'];
-			$new_arr['order_meta']      = $formatted_meta_data;
-			$line_items['line_items'][] = $new_arr;
+			$inc_tax                           = true;
+			$round                             = false; // Not rounded at item level ("true"  for rounding at item level)
+			$product_name                      = $item_values['name'];
+			$new_arr['product_id']             = $item_data['product_id'];
+			$new_arr['product_img_url']        = $product_img_url;
+			$new_arr['product_name']           = $item_data['name'];
+			$new_arr['product_cat']            = $product_cat_slug;
+			$new_arr['sku']                    = $item_sku;
+			$new_arr['item_total']             = $order->get_line_total( $item_values, $inc_tax, $round );
+			$new_arr['item_total_tax']         = $order->get_line_tax( $item_values );
+			$new_arr['variation_id']           = $item_data['variation_id'];
+			$new_arr['quantity']               = $item_data['quantity'];
+			$new_arr['reference_for_customer'] = $reference_for_customer;
+			$new_arr['order_meta']             = $formatted_meta_data;
+			$line_items['line_items'][]        = $new_arr;
+
 		}
 		foreach ( $order->get_items( 'shipping' ) as $item_id => $item ) {
 			/* $order_item_name             = $item->get_name();
@@ -204,11 +240,9 @@ final class HoodslyHub {
 			],
 			'line_items'           => $line_items,
 			'shipping_lines'       => [
-				[
-					'method_id'    => $shipping_method_id,
-					'method_title' => $shipping_method_title,
-					'total'        => $shipping_method_total
-				]
+				'method_id'    => $shipping_method_id,
+				'method_title' => $shipping_method_title,
+				'total'        => $shipping_method_total
 			]
 		];
 
@@ -233,7 +267,6 @@ final class HoodslyHub {
 			'origin'                  => $host,
 			'order_date'              => $order_date,
 			'meta_data'               => $formatted_meta_data,
-			// 'order_data'   => $line_items,
 			'product_name'            => $product_name,
 			'product_cat'             => $product_cat_slug,
 			'product_sku'             => $item_sku,
