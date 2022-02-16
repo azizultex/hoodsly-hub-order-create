@@ -36,6 +36,7 @@ final class HoodslyHub {
 		$status_label = wc_get_order_status_name( $order_status );
 
 		$line_items['order_total'] = $order->get_total();
+		$product_cat               = [];
 		foreach ( $order->get_items() as $item_key => $item_values ) {
 			//write_log($item_values);
 			$product = wc_get_product( $item_values->get_product_id() );
@@ -79,12 +80,18 @@ final class HoodslyHub {
 			}
 
 
-			$terms            = get_the_terms( $item_data['product_id'], 'product_cat' );
-			$product_cat_slug = [];
-			foreach ( $terms as $term ) {
+			$terms = get_the_terms( $item_data['product_id'], 'product_cat' );
+			//write_log($terms);
+			foreach ( $terms as $key => $term ) {
 				// Categories by slug
-				$product_cat_slug[] = $term->slug;
+				$product_cat[] = $term->slug;
+				//write_log($term->slug);
+
 			}
+			//$product_cat['']
+			//$product_cat_slug = array_merge($product_cat_slug, $product_cat_slug);
+			//$product_cat['slug'] = $product_cat_slug;
+			//write_log($product_cat);
 
 			$inc_tax                    = true;
 			$round                      = false; // Not rounded at item level ("true"  for rounding at item level)
@@ -101,7 +108,8 @@ final class HoodslyHub {
 			$line_items['line_items'][] = $new_arr;
 		}
 		$line_items['product_cat'] = $product_cat_slug;
-		write_log($line_items);
+		//write_log($product_cat);
+
 	}
 
 	/**
@@ -133,6 +141,7 @@ final class HoodslyHub {
 		$order_status              = $order->get_status();
 		$order_status              = wc_get_order_status_name( $order_status );
 		$line_items['order_total'] = $order->get_total();
+		$product_catSlug           = [];
 		foreach ( $order->get_items() as $item_key => $item_values ) {
 
 			$product           = wc_get_product( $item_values->get_product_id() );
@@ -148,10 +157,17 @@ final class HoodslyHub {
 			$new_arr             = [];
 			$item_meta_data      = $item_values->get_meta_data();
 			$formatted_meta_data = $item_values->get_formatted_meta_data( '_', true );
-			write_log( $formatted_meta_data );
+			//write_log( $formatted_meta_data );
 			$formatted_meta_data_array = json_decode( json_encode( $formatted_meta_data ), true );
 			$reference_for_customer    = '';
 			$sku                       = '';
+
+
+			$terms = get_the_terms( $item_data['product_id'], 'product_cat' );
+			foreach ( $terms as $term ) {
+				// Categories by slug
+				$product_catSlug[] = $term->slug;
+			}
 
 			foreach ( $formatted_meta_data_array as $value ) {
 				if ( $value['key'] === 'SKU' ) {
@@ -173,8 +189,7 @@ final class HoodslyHub {
 				}
 			}
 
-			$terms            = get_the_terms( $item_data['product_id'], 'product_cat' );
-			$product_cat_slug = [];
+			$terms = get_the_terms( $item_data['product_id'], 'product_cat' );
 			foreach ( $terms as $term ) {
 				// Categories by slug
 				$product_cat_slug = $term->slug;
@@ -255,7 +270,7 @@ final class HoodslyHub {
 		$rest_api_url = $api_url;
 		$host         = parse_url( get_site_url(), PHP_URL_HOST );
 		//$domains = explode('.', $host);
-
+		write_log( $product_catSlug );
 		$data_string = json_encode( [
 			'title'                   => '#' . $order_id . '',
 			'order_id'                => intval( $order_id ),
@@ -263,12 +278,12 @@ final class HoodslyHub {
 			'content'                 => '#' . $order_id . '<br>' . $data['shipping']['first_name'] . ' ' . $data['billing']['last_name'] . '<br>' . $data['billing']['email'] . '<br>' . $data['billing']['phone'] . '<br>' . $data['shipping']['address_1'] . $data['shipping']['address_2'] . ' ,' . $data['shipping']['city'] . ' ,' . $data['shipping']['state'] . ' ' . $data['shipping']['postcode'] . '',
 			'status'                  => 'publish',
 			'estimated_shipping_date' => get_post_meta( $order_id, 'estimated_shipping_date', true ),
-			'bill_of_landing_id'      => get_post_meta( $order_id, 'bill_of_landing_id', true ),
+			//'bill_of_landing_id'      => get_post_meta( $order_id, 'bill_of_landing_id', true ),
 			'origin'                  => $host,
 			'order_date'              => $order_date,
 			'meta_data'               => $formatted_meta_data,
 			'product_name'            => $product_name,
-			'product_cat'             => $product_cat_slug,
+			'product_cat'             => $product_catSlug,
 			'product_sku'             => $item_sku,
 			'order_status'            => $order_status,
 			'custom_color_match'      => $custom_color_match,
