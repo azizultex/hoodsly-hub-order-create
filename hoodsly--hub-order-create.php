@@ -23,7 +23,7 @@ final class HoodslyHub{
 
     public function __construct(){
         add_action('woocommerce_thankyou', [$this, 'send_order_data'], 10, 1);
-        //add_action('admin_init', [$this, 'test_order_data']);
+        add_action('admin_init', [$this, 'test_order_data']);
     }
 
     function test_order_data(){
@@ -34,10 +34,10 @@ final class HoodslyHub{
         $order_status  = $order->get_status();
         $status_label = wc_get_order_status_name( $order_status );
         
-
+        //write_log($order);
         $line_items['order_total'] = $order->get_total();
         foreach ( $order->get_items() as  $item_key => $item_values ) {
-            //write_log($item_values);
+            write_log($item_values);
             $product = wc_get_product($item_values->get_product_id());
 
             $product_img_url = wp_get_attachment_url( $product->get_image_id() );
@@ -76,7 +76,6 @@ final class HoodslyHub{
             $new_arr['order_meta'] = $formatted_meta_data;
             $line_items['line_items'][] = $new_arr;
         }
-        write_log($line_items);
     }
 
 	/**
