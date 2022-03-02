@@ -23,7 +23,7 @@ final class HoodslyHub {
 
 	public function __construct() {
 		add_action( 'woocommerce_thankyou', [ $this, 'send_order_data' ], 10, 1 );
-		add_action( 'admin_init', [ $this, 'test_order_data' ] );
+		//add_action( 'admin_init', [ $this, 'test_order_data' ] );
 	}
 
 	/**
@@ -73,8 +73,8 @@ final class HoodslyHub {
 	}
 
 	function test_order_data() {
-		$order_id = intval( 26439 );
-		$order    = wc_get_order( 26439 );
+		$order_id = intval( 26478 );
+		$order    = wc_get_order( $order_id );
 
 		$line_items                = array();
 		$data                      = $order->get_data();
@@ -85,6 +85,7 @@ final class HoodslyHub {
 		$product_catSlug           = [];
 		$productName               = [];
 		$reduce_height             = '';
+		$item_Size                 = '';
 
 		foreach ( $order->get_items() as $item_key => $item_values ) {
 
@@ -95,17 +96,27 @@ final class HoodslyHub {
 			preg_match_all( $pattern, $product_image_url, $matches );
 			$product_img_url = $matches[0][0];
 
-			//write_log($product_img_url);
 			$item_sku            = $product->get_sku();
 			$item_data           = $item_values->get_data();
 			$new_arr             = [];
 			$item_meta_data      = $item_values->get_meta_data();
 			$formatted_meta_data = $item_values->get_formatted_meta_data( '_', true );
-			//write_log( $formatted_meta_data );
+
 			$formatted_meta_data_array = json_decode( json_encode( $formatted_meta_data ), true );
 			$reference_for_customer    = '';
 			$sku                       = '';
 			$color                     = '';
+			$color_key                 = '';
+			$size                      = '';
+			$size_key                  = '';
+			$trim_options              = '';
+			$remove_trim               = '';
+			$crown_molding             = '';
+			$increase_depth            = '';
+			$reduce_height             = '';
+			$solid_button              = '';
+			$rush_my_order             = '';
+			$extend_chimney            = '';
 
 			$item_Size = $this->hypemill_product_size( $item_values );
 
@@ -117,20 +128,96 @@ final class HoodslyHub {
 
 			foreach ( $formatted_meta_data_array as $value ) {
 				if ( $value['key'] === 'pa_color' ) {
-					$color = str_replace( [ '<p>', '</p>' ], [
+					$color     = str_replace( [ '<p>', '</p>' ], [
 						'',
 						''
 					], html_entity_decode( $value['display_value'] ) );
+					$color_key = $value['value'];
 				}
-				if ( $value['key'] === 'SKU' ) {
-					$sku = $value['value'];
-				}
-
-				if ( $value['key'] === 'reduce_height' ) {
-					$reduce_height = $value['value'];
-				}
+				// Get the EPO ref for customer
 				if ( $value['key'] === 'reference_for_customer' ) {
 					$reference_for_customer = $value['value'];
+				}
+
+				// Get the size of the product
+				if ( $value['display_key'] === 'Size' ) {
+					$size     = str_replace( [ '<p>', '</p>' ], [
+						'',
+						''
+					], html_entity_decode( $value['display_value'] ) );
+					$size_key = $value['value'];
+				}
+
+				// Ge the SKU from product
+
+				if ( $value['key'] === 'SKU' ) {
+					$sku = str_replace( [ '<p>', '</p>' ], [
+						'',
+						''
+					], html_entity_decode( $value['display_value'] ) );;
+				}
+				// Ge the Removed Trim from product
+				if ( $value['display_key'] === 'Trim Options' ) {
+					$trim_options = str_replace( [ '<p>', '</p>' ], [
+						'',
+						''
+					], html_entity_decode( $value['display_value'] ) );;
+				}
+
+				// Ge the Removed Trim from product
+				if ( $value['key'] === 'remove_your_trim' ) {
+					$remove_trim = str_replace( [ '<p>', '</p>' ], [
+						'',
+						''
+					], html_entity_decode( $value['display_value'] ) );;
+				}
+
+				// Ge the Crown Molding
+				if ( $value['display_key'] === 'Crown Molding (Optional)' ) {
+					$crown_molding = str_replace( [ '<p>', '</p>' ], [
+						'',
+						''
+					], html_entity_decode( $value['display_value'] ) );;
+
+				}
+
+				// Ge the Increase Depth
+				if ( $value['display_key'] === 'Increase Depth' ) {
+					$increase_depth = str_replace( [ '<p>', '</p>' ], [
+						'',
+						''
+					], html_entity_decode( $value['display_value'] ) );;
+				}
+
+				// Ge the Reduce height
+				if ( $value['key'] === 'reduce_height' ) {
+					$reduce_height = str_replace( [ '<p>', '</p>' ], [
+						'',
+						''
+					], html_entity_decode( $value['display_value'] ) );;
+				}
+
+				// Ge the SOlid Button Data
+				if ( $value['display_key'] === 'Add A Solid Bottom' ) {
+					$solid_button = str_replace( [ '<p>', '</p>' ], [
+						'',
+						''
+					], html_entity_decode( $value['display_value'] ) );;
+				}
+
+				// Ge the Rush Manufacturing data
+				if ( $value['display_key'] === 'Rush Manufacturing' ) {
+					$rush_my_order = str_replace( [ '<p>', '</p>' ], [
+						'',
+						''
+					], html_entity_decode( $value['display_value'] ) );;
+				}
+				// Ge the Rush Manufacturing data
+				if ( $value['display_key'] === 'Extend Your Chimney' ) {
+					$extend_chimney = str_replace( [ '<p>', '</p>' ], [
+						'',
+						''
+					], html_entity_decode( $value['display_value'] ) );;
 				}
 			}
 
@@ -163,12 +250,23 @@ final class HoodslyHub {
 			$new_arr['item_total_tax']         = $order->get_line_tax( $item_values );
 			$new_arr['variation_id']           = $item_data['variation_id'];
 			$new_arr['quantity']               = $item_data['quantity'];
+			$new_arr['color']                  = [ $color ];
+			$new_arr[ $size_key ]              = $size;
+			$new_arr['sku']                    = $sku;
+			$new_arr['trim_options']           = $trim_options;
+			$new_arr['remove_trim']            = $remove_trim;
+			$new_arr['crown_molding']          = $crown_molding;
+			$new_arr['increase_depth']         = $increase_depth;
+			$new_arr['reduce_height']          = $reduce_height;
+			$new_arr['solid_button']           = $solid_button;
+			$new_arr['rush_my_order']          = $rush_my_order;
+			$new_arr['extend_chimney']         = $extend_chimney;
 			$new_arr['reference_for_customer'] = $reference_for_customer;
-			$new_arr['color']                  = $color;
-			$new_arr['order_meta']             = $formatted_meta_data;
+			$new_arr['order_meta']             = $formatted_meta_data_array;
 			$line_items['line_items'][]        = $new_arr;
 
 		}
+		write_log( $line_items );
 
 		foreach ( $order->get_items( 'shipping' ) as $item_id => $item ) {
 			/* $order_item_name             = $item->get_name();
@@ -242,15 +340,15 @@ final class HoodslyHub {
 			'origin'                  => $host,
 			'order_date'              => $order_date,
 			'meta_data'               => $formatted_meta_data,
+			'product_height'          => $item_Size,
 			'product_name'            => $productName,
+			'reduce_height'           => $reduce_height,
 			'product_cat'             => $product_catSlug,
 			'product_sku'             => $item_sku,
 			'order_status'            => $order_status,
 			'custom_color_match'      => $custom_color_match,
 			//'order_summery'           => $order_summery,
 		] );
-		write_log( $reduce_height );
-
 
 	}
 
@@ -300,6 +398,17 @@ final class HoodslyHub {
 			$reference_for_customer    = '';
 			$sku                       = '';
 			$color                     = '';
+			$color_key                 = '';
+			$size                      = '';
+			$trim_options              = '';
+			$remove_trim               = '';
+			$crown_molding             = '';
+			$increase_depth            = '';
+			$reduce_height             = '';
+			$solid_button              = '';
+			$rush_my_order             = '';
+			$extend_chimney            = '';
+
 
 			$item_Size = $this->hypemill_product_size( $item_values );
 			$terms     = get_the_terms( $item_data['product_id'], 'product_cat' );
@@ -310,19 +419,65 @@ final class HoodslyHub {
 
 			foreach ( $formatted_meta_data_array as $value ) {
 				if ( $value['key'] === 'pa_color' ) {
-					$color = str_replace( [ '<p>', '</p>' ], [
+					$color     = str_replace( [ '<p>', '</p>' ], [
 						'',
 						''
 					], html_entity_decode( $value['display_value'] ) );
+					$color_key = $value['value'];
 				}
+				// Get the EPO ref for customer
+				if ( $value['key'] === 'reference_for_customer' ) {
+					$reference_for_customer = $value['value'];
+				}
+
+				// Get the size of the product
+				if ( $value['display_key'] === 'Size' ) {
+					$size = $value['value'];
+				}
+
+				// Ge the SKU from product
+
 				if ( $value['key'] === 'SKU' ) {
 					$sku = $value['value'];
 				}
-				if ( $value['key'] === 'reduce_height' ) {
-					$reduce_height = $value['value'];
+				// Ge the Removed Trim from product
+				if ( $value['display_key'] === 'Trim Options' ) {
+					$trim_options = $value['display_value'];
 				}
-				if ( $value['key'] === 'reference_for_customer' ) {
-					$reference_for_customer = $value['value'];
+
+				// Ge the Removed Trim from product
+				if ( $value['value'] === 'remove_your_trim' ) {
+					$remove_trim = $value['display_value'];
+				}
+
+				// Ge the Crown Molding
+				if ( $value['display_key'] === 'Crown Molding (Optional)' ) {
+					$crown_molding = $value['display_value'];
+
+				}
+
+				// Ge the Increase Depth
+				if ( $value['display_key'] === 'Increase Depth' ) {
+					$increase_depth = $value['display_value'];
+				}
+
+				// Ge the Reduce height
+				if ( $value['key'] === 'reduce_height' ) {
+					$reduce_height = $value['display_value'];
+				}
+
+				// Ge the SOlid Button Data
+				if ( $value['display_key'] === 'Add A Solid Bottom' ) {
+					$solid_button = $value['display_value'];
+				}
+
+				// Ge the Rush Manufacturing data
+				if ( $value['display_key'] === 'Rush Manufacturing' ) {
+					$rush_my_order = $value['display_value'];
+				}
+				// Ge the Rush Manufacturing data
+				if ( $value['display_key'] === 'Extend Your Chimney' ) {
+					$extend_chimney = $value['display_value'];
 				}
 			}
 
@@ -358,7 +513,17 @@ final class HoodslyHub {
 			$new_arr['quantity']               = $item_data['quantity'];
 			$new_arr['reference_for_customer'] = $reference_for_customer;
 			$new_arr['color']                  = $color;
-			$new_arr['order_meta']             = $formatted_meta_data;
+			$new_arr['size']                   = $size;
+			$new_arr['sku']                    = $sku;
+			$new_arr['trim_options']           = $trim_options;
+			$new_arr['remove_trim']            = $remove_trim;
+			$new_arr['crown_molding']          = $crown_molding;
+			$new_arr['increase_depth']         = $increase_depth;
+			$new_arr['reduce_height']          = $reduce_height;
+			$new_arr['solid_button']           = $solid_button;
+			$new_arr['rush_my_order']          = $rush_my_order;
+			$new_arr['extend_chimney']         = $extend_chimney;
+			$new_arr['order_meta']             = $formatted_meta_data_array;
 			$line_items['line_items'][]        = $new_arr;
 
 		}
@@ -421,7 +586,6 @@ final class HoodslyHub {
 		$rest_api_url = $api_url;
 		$host         = parse_url( get_site_url(), PHP_URL_HOST );
 		//$domains = explode('.', $host);
-		//write_log( $product_catSlug );
 		$data_string = json_encode( [
 			'title'                   => '#' . $order_id . '',
 			'order_id'                => intval( $order_id ),
