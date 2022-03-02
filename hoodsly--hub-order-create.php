@@ -379,6 +379,7 @@ final class HoodslyHub {
 		$productName               = [];
 		$item_Size                 = '';
 		$reduce_height             = '';
+		$height             = '';
 		foreach ( $order->get_items() as $item_key => $item_values ) {
 
 			$product           = wc_get_product( $item_values->get_product_id() );
@@ -461,6 +462,10 @@ final class HoodslyHub {
 					$increase_depth = $value['display_value'];
 				}
 
+				// Ge the height
+				if ( $value['key'] === 'reduce_height' ) {
+					$height = $value['value'];
+				}
 				// Ge the Reduce height
 				if ( $value['key'] === 'reduce_height' ) {
 					$reduce_height = $value['display_value'];
@@ -599,7 +604,7 @@ final class HoodslyHub {
 			'meta_data'               => $formatted_meta_data,
 			'product_name'            => $productName,
 			'product_height'          => $item_Size,
-			'reduce_height'           => $reduce_height,
+			'reduce_height'           => $height,
 			'product_cat'             => $product_catSlug,
 			'product_sku'             => $item_sku,
 			'order_status'            => $order_status,
