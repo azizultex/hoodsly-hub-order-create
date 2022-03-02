@@ -23,7 +23,7 @@ final class HoodslyHub {
 
 	public function __construct() {
 		add_action( 'woocommerce_thankyou', [ $this, 'send_order_data' ], 10, 1 );
-		//add_action( 'admin_init', [ $this, 'test_order_data' ] );
+		add_action( 'admin_init', [ $this, 'test_order_data' ] );
 	}
 
 	/**
@@ -73,8 +73,8 @@ final class HoodslyHub {
 	}
 
 	function test_order_data() {
-		$order_id = intval( 26428 );
-		$order    = wc_get_order( 26428 );
+		$order_id = intval( 26439 );
+		$order    = wc_get_order( 26439 );
 
 		$line_items                = array();
 		$data                      = $order->get_data();
@@ -84,8 +84,7 @@ final class HoodslyHub {
 		$line_items['order_total'] = $order->get_total();
 		$product_catSlug           = [];
 		$productName               = [];
-		$item_Size                 = '';
-
+		$reduce_height             = '';
 
 		foreach ( $order->get_items() as $item_key => $item_values ) {
 
@@ -106,8 +105,7 @@ final class HoodslyHub {
 			$formatted_meta_data_array = json_decode( json_encode( $formatted_meta_data ), true );
 			$reference_for_customer    = '';
 			$sku                       = '';
-			$height                    = '';
-
+			$color                     = '';
 
 			$item_Size = $this->hypemill_product_size( $item_values );
 
@@ -118,16 +116,19 @@ final class HoodslyHub {
 			}
 
 			foreach ( $formatted_meta_data_array as $value ) {
+				if ( $value['key'] === 'pa_color' ) {
+					$color = str_replace( [ '<p>', '</p>' ], [
+						'',
+						''
+					], html_entity_decode( $value['display_value'] ) );
+				}
 				if ( $value['key'] === 'SKU' ) {
 					$sku = $value['value'];
 				}
-			}
-			foreach ( $formatted_meta_data_array as $value ) {
-				if ( $value['display_key'] === 'Size' ) {
-					$height = $value['value'];
+
+				if ( $value['key'] === 'reduce_height' ) {
+					$reduce_height = $value['value'];
 				}
-			}
-			foreach ( $formatted_meta_data_array as $value ) {
 				if ( $value['key'] === 'reference_for_customer' ) {
 					$reference_for_customer = $value['value'];
 				}
@@ -163,6 +164,7 @@ final class HoodslyHub {
 			$new_arr['variation_id']           = $item_data['variation_id'];
 			$new_arr['quantity']               = $item_data['quantity'];
 			$new_arr['reference_for_customer'] = $reference_for_customer;
+			$new_arr['color']                  = $color;
 			$new_arr['order_meta']             = $formatted_meta_data;
 			$line_items['line_items'][]        = $new_arr;
 
@@ -247,7 +249,8 @@ final class HoodslyHub {
 			'custom_color_match'      => $custom_color_match,
 			//'order_summery'           => $order_summery,
 		] );
-		write_log( $productName );
+		write_log( $reduce_height );
+
 
 	}
 
@@ -268,12 +271,6 @@ final class HoodslyHub {
 	public function send_order_data( $order_id ) {
 		$order = wc_get_order( $order_id );
 
-//		$order_history = wc_get_order_notes( array(
-//			'order_id' => $order_id,
-//			'orderby'  => 'date_created_gmt',
-//		) );
-//		$order_summery = json_decode( json_encode( $order_history ), true );
-
 		$line_items                = array();
 		$data                      = $order->get_data();
 		$order_date                = $order->order_date;
@@ -282,7 +279,8 @@ final class HoodslyHub {
 		$line_items['order_total'] = $order->get_total();
 		$product_catSlug           = [];
 		$productName               = [];
-		$item_Size = '';
+		$item_Size                 = '';
+		$reduce_height             = '';
 		foreach ( $order->get_items() as $item_key => $item_values ) {
 
 			$product           = wc_get_product( $item_values->get_product_id() );
@@ -293,29 +291,36 @@ final class HoodslyHub {
 			$product_img_url = $matches[0][0];
 
 			//write_log($product_img_url);
-			$item_sku            = $product->get_sku();
-			$item_data           = $item_values->get_data();
-			$new_arr             = [];
-			$item_meta_data      = $item_values->get_meta_data();
-			$formatted_meta_data = $item_values->get_formatted_meta_data( '_', true );
-			//write_log( $formatted_meta_data );
+			$item_sku                  = $product->get_sku();
+			$item_data                 = $item_values->get_data();
+			$new_arr                   = [];
+			$item_meta_data            = $item_values->get_meta_data();
+			$formatted_meta_data       = $item_values->get_formatted_meta_data( '_', true );
 			$formatted_meta_data_array = json_decode( json_encode( $formatted_meta_data ), true );
 			$reference_for_customer    = '';
 			$sku                       = '';
+			$color                     = '';
 
 			$item_Size = $this->hypemill_product_size( $item_values );
-			$terms = get_the_terms( $item_data['product_id'], 'product_cat' );
+			$terms     = get_the_terms( $item_data['product_id'], 'product_cat' );
 			foreach ( $terms as $term ) {
 				// Categories by slug
 				$product_catSlug[] = $term->slug;
 			}
 
 			foreach ( $formatted_meta_data_array as $value ) {
+				if ( $value['key'] === 'pa_color' ) {
+					$color = str_replace( [ '<p>', '</p>' ], [
+						'',
+						''
+					], html_entity_decode( $value['display_value'] ) );
+				}
 				if ( $value['key'] === 'SKU' ) {
 					$sku = $value['value'];
 				}
-			}
-			foreach ( $formatted_meta_data_array as $value ) {
+				if ( $value['key'] === 'reduce_height' ) {
+					$reduce_height = $value['value'];
+				}
 				if ( $value['key'] === 'reference_for_customer' ) {
 					$reference_for_customer = $value['value'];
 				}
@@ -352,11 +357,11 @@ final class HoodslyHub {
 			$new_arr['variation_id']           = $item_data['variation_id'];
 			$new_arr['quantity']               = $item_data['quantity'];
 			$new_arr['reference_for_customer'] = $reference_for_customer;
+			$new_arr['color']                  = $color;
 			$new_arr['order_meta']             = $formatted_meta_data;
 			$line_items['line_items'][]        = $new_arr;
 
 		}
-		write_log( $productName );
 		foreach ( $order->get_items( 'shipping' ) as $item_id => $item ) {
 			/* $order_item_name             = $item->get_name();
 			$order_item_type             = $item->get_type();
@@ -430,7 +435,8 @@ final class HoodslyHub {
 			'meta_data'               => $formatted_meta_data,
 			'product_name'            => $productName,
 			'product_height'          => $item_Size,
-		'product_cat'             => $product_catSlug,
+			'reduce_height'           => $reduce_height,
+			'product_cat'             => $product_catSlug,
 			'product_sku'             => $item_sku,
 			'order_status'            => $order_status,
 			'custom_color_match'      => $custom_color_match,
