@@ -378,8 +378,7 @@ final class HoodslyHub {
 		$product_catSlug           = [];
 		$productName               = [];
 		$item_Size                 = '';
-		$reduce_height             = '';
-		$height             = '';
+		$height                    = '';
 		foreach ( $order->get_items() as $item_key => $item_values ) {
 
 			$product           = wc_get_product( $item_values->get_product_id() );
@@ -399,11 +398,14 @@ final class HoodslyHub {
 			$reference_for_customer    = '';
 			$sku                       = '';
 			$color                     = '';
-			$color_key                 = '';
 			$size                      = '';
+			$size_key                  = '';
 			$trim_options              = '';
+			$trim_options_key          = '';
 			$remove_trim               = '';
+			$remove_trim_key           = '';
 			$crown_molding             = '';
+			$crown_molding_key         = '';
 			$increase_depth            = '';
 			$reduce_height             = '';
 			$solid_button              = '';
@@ -420,11 +422,10 @@ final class HoodslyHub {
 
 			foreach ( $formatted_meta_data_array as $value ) {
 				if ( $value['key'] === 'pa_color' ) {
-					$color     = str_replace( [ '<p>', '</p>' ], [
+					$color = str_replace( [ '<p>', '</p>' ], [
 						'',
 						''
 					], html_entity_decode( $value['display_value'] ) );
-					$color_key = $value['value'];
 				}
 				// Get the EPO ref for customer
 				if ( $value['key'] === 'reference_for_customer' ) {
@@ -433,28 +434,43 @@ final class HoodslyHub {
 
 				// Get the size of the product
 				if ( $value['display_key'] === 'Size' ) {
-					$size = $value['value'];
+					$size     = str_replace( [ '<p>', '</p>' ], [
+						'',
+						''
+					], html_entity_decode( $value['display_value'] ) );
+					$size_key = $value['value'];
 				}
 
 				// Ge the SKU from product
-
 				if ( $value['key'] === 'SKU' ) {
 					$sku = $value['value'];
 				}
 				// Ge the Removed Trim from product
 				if ( $value['display_key'] === 'Trim Options' ) {
-					$trim_options = $value['display_value'];
+					$trim_options     = str_replace( [ '<p>', '</p>' ], [
+						'',
+						''
+					], html_entity_decode( $value['display_value'] ) );
+					$trim_options_key = $value['value'];
+
 				}
 
 				// Ge the Removed Trim from product
-				if ( $value['value'] === 'remove_your_trim' ) {
-					$remove_trim = $value['display_value'];
+				if ( $value['key'] === 'remove_your_trim' ) {
+					$remove_trim     = str_replace( [ '<p>', '</p>' ], [
+						'',
+						''
+					], html_entity_decode( $value['display_value'] ) );
+					$remove_trim_key = $value['value'];
 				}
 
 				// Ge the Crown Molding
 				if ( $value['display_key'] === 'Crown Molding (Optional)' ) {
-					$crown_molding = $value['display_value'];
-
+					$crown_molding     = str_replace( [ '<p>', '</p>' ], [
+						'',
+						''
+					], html_entity_decode( $value['display_value'] ) );
+					$crown_molding_key = $value['value'];
 				}
 
 				// Ge the Increase Depth
@@ -518,11 +534,11 @@ final class HoodslyHub {
 			$new_arr['quantity']               = $item_data['quantity'];
 			$new_arr['reference_for_customer'] = $reference_for_customer;
 			$new_arr['color']                  = $color;
-			$new_arr['size']                   = $size;
+			$new_arr['size']                   = [ 'key' => $size_key, 'value' => $size ];
 			$new_arr['sku']                    = $sku;
-			$new_arr['trim_options']           = $trim_options;
-			$new_arr['remove_trim']            = $remove_trim;
-			$new_arr['crown_molding']          = $crown_molding;
+			$new_arr['trim_options']           = [ 'key' => $trim_options_key, 'value' => $trim_options ];
+			$new_arr['remove_trim']            = [ 'key' => $remove_trim_key, 'value' => $remove_trim ];
+			$new_arr['crown_molding']          = [ 'key' => $crown_molding_key, 'value' => $crown_molding ];
 			$new_arr['increase_depth']         = $increase_depth;
 			$new_arr['reduce_height']          = $reduce_height;
 			$new_arr['solid_button']           = $solid_button;
@@ -533,19 +549,11 @@ final class HoodslyHub {
 
 		}
 		foreach ( $order->get_items( 'shipping' ) as $item_id => $item ) {
-			/* $order_item_name             = $item->get_name();
-			$order_item_type             = $item->get_type();
-			$shipping_method_id          = $item->get_method_id(); // The method ID
-			$shipping_method_instance_id = $item->get_instance_id(); // The instance ID
-			$shipping_method_total_tax   = $item->get_total_tax();
-			$shipping_method_taxes       = $item->get_taxes(); */
 
 			$shipping_method_total = $item->get_total();
 			$shipping_method_id    = $item->get_method_id(); // The method ID
 			$shipping_method_title = $item->get_method_title();
 		}
-		/* $data = $order->get_data();
-		$endpoint = 'https://hoodslyhub.com/wp-json/wc/v3/orders/'; */
 		$details_data = [
 			'payment_method'       => $data['payment_method'],
 			'payment_method_title' => $data['payment_method_title'],
@@ -598,7 +606,6 @@ final class HoodslyHub {
 			'content'                 => '#' . $order_id . '<br>' . $data['shipping']['first_name'] . ' ' . $data['billing']['last_name'] . '<br>' . $data['billing']['email'] . '<br>' . $data['billing']['phone'] . '<br>' . $data['shipping']['address_1'] . $data['shipping']['address_2'] . ' ,' . $data['shipping']['city'] . ' ,' . $data['shipping']['state'] . ' ' . $data['shipping']['postcode'] . '',
 			'status'                  => 'publish',
 			'estimated_shipping_date' => get_post_meta( $order_id, 'estimated_shipping_date', true ),
-			//'bill_of_landing_id'      => get_post_meta( $order_id, 'bill_of_landing_id', true ),
 			'origin'                  => $host,
 			'order_date'              => $order_date,
 			'meta_data'               => $formatted_meta_data,
@@ -609,7 +616,6 @@ final class HoodslyHub {
 			'product_sku'             => $item_sku,
 			'order_status'            => $order_status,
 			'custom_color_match'      => $custom_color_match,
-			//'order_summery'           => $order_summery,
 		] );
 
 
