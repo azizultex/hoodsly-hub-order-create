@@ -23,7 +23,7 @@ final class HoodslyHub {
 
 	public function __construct() {
 		add_action( 'woocommerce_thankyou', [ $this, 'send_order_data' ], 10, 1 );
-		//add_action( 'admin_init', [ $this, 'test_order_data' ] );
+		add_action( 'admin_init', [ $this, 'test_order_data' ] );
 	}
 
 	/**
@@ -73,7 +73,7 @@ final class HoodslyHub {
 	}
 
 	function test_order_data() {
-		$order_id = intval( 26478 );
+		$order_id = intval( 26499 );
 		$order    = wc_get_order( $order_id );
 
 		$line_items                = array();
@@ -117,7 +117,7 @@ final class HoodslyHub {
 			$solid_button              = '';
 			$rush_my_order             = '';
 			$extend_chimney            = '';
-
+//write_log($formatted_meta_data_array);
 			$item_Size = $this->hypemill_product_size( $item_values );
 
 			$terms = get_the_terms( $item_data['product_id'], 'product_cat' );
@@ -396,21 +396,34 @@ final class HoodslyHub {
 			$formatted_meta_data       = $item_values->get_formatted_meta_data( '_', true );
 			$formatted_meta_data_array = json_decode( json_encode( $formatted_meta_data ), true );
 			$reference_for_customer    = '';
-			$sku                       = '';
 			$color                     = '';
+			$color_key                 = '';
+			$sku                       = '';
+			$sku_key                   = '';
 			$size                      = '';
 			$size_key                  = '';
+			$vent_option               = '';
+			$vent_option_key           = '';
 			$trim_options              = '';
+			$zline_filter              = '';
+			$zline_filter_key          = '';
+			$zline_vent_options        = '';
+			$zline_vent_options_key    = '';
 			$trim_options_key          = '';
 			$remove_trim               = '';
 			$remove_trim_key           = '';
-			$crown_molding             = '';
-			$crown_molding_key         = '';
+			$molding                   = '';
+			$molding_key               = '';
 			$increase_depth            = '';
+			$increase_depth_key        = '';
 			$reduce_height             = '';
-			$solid_button              = '';
-			$rush_my_order             = '';
+			$reduce_height_key         = '';
 			$extend_chimney            = '';
+			$extend_chimney_key        = '';
+			$solid_button              = '';
+			$solid_button_key          = '';
+			$rush_my_order             = '';
+			$rush_my_order_key         = '';
 
 
 			$item_Size = $this->hypemill_product_size( $item_values );
@@ -422,14 +435,11 @@ final class HoodslyHub {
 
 			foreach ( $formatted_meta_data_array as $value ) {
 				if ( $value['key'] === 'pa_color' ) {
-					$color = str_replace( [ '<p>', '</p>' ], [
+					$color     = str_replace( [ '<p>', '</p>' ], [
 						'',
 						''
 					], html_entity_decode( $value['display_value'] ) );
-				}
-				// Get the EPO ref for customer
-				if ( $value['key'] === 'reference_for_customer' ) {
-					$reference_for_customer = $value['value'];
+					$color_key = $value['value'];
 				}
 
 				// Get the size of the product
@@ -440,10 +450,70 @@ final class HoodslyHub {
 					], html_entity_decode( $value['display_value'] ) );
 					$size_key = $value['value'];
 				}
+				// Get the Ventilation Options of the product
+				/*if ( $value['display_key'] === 'Ventilation Options' ) {
+					$vent_option     = str_replace( [ '<p>', '</p>' ], [
+						'',
+						''
+					], html_entity_decode( $value['display_value'] ) );
+					$vent_option_key = $value['value'];
+				}*/
+				// Get the Zline Recirculating Filters of the product
+				/*if ( $value['display_key'] === 'Zline Recirculating Filters' ) {
+					$zline_filter     = str_replace( [ '<p>', '</p>' ], [
+						'',
+						''
+					], html_entity_decode( $value['display_value'] ) );
+					$zline_filter_key = $value['value'];
+				}*/
+				// Get the Zline Recirculating Filters of the product
+				/*if ( $value['key'] === 'zline_recirculating_vent_options' ) {
+					$zline_vent_options     = str_replace( [ '<p>', '</p>' ], [
+						'',
+						''
+					], html_entity_decode( $value['display_value'] ) );
+					$zline_vent_options_key = $value['value'];
+				}*/
+				// Get the Tradewinds Recirculating Filters of the product
+				/*	if ( $value['key'] === 'tradewinds_recirculting_vents' ) {
+					$tradewinds_vent_options     = str_replace( [ '<p>', '</p>' ], [
+						'',
+						''
+					], html_entity_decode( $value['display_value'] ) );
+					$tradewinds_vent_options_key = $value['value'];
+				}*/
+				// Get the Tradewinds Options of the product
+				/*if ( $value['display_key'] === 'Tradewinds Options' ) {
+					$tradewinds_options = str_replace( [ '<p>', '</p>' ], [
+						'',
+						''
+					], html_entity_decode( $value['display_value'] ) );
+					$tradewinds_options = $value['value'];
+				}*/
+				// Get the Model of the product
+				/*if ( $value['display_key'] === 'Choose A Model' ) {
+					$model     = str_replace( [ '<p>', '</p>' ], [
+						'',
+						''
+					], html_entity_decode( $value['display_value'] ) );
+					$model_key = $value['value'];
+				}*/
+				// Get the Vent A Hood of the product
+				/*if ( $value['display_key'] === 'Vent A Hood' ) {
+					$ventahood     = str_replace( [ '<p>', '</p>' ], [
+						'',
+						''
+					], html_entity_decode( $value['display_value'] ) );
+					$ventahood_key = $value['value'];
+				}*/
 
 				// Ge the SKU from product
 				if ( $value['key'] === 'SKU' ) {
-					$sku = $value['value'];
+					$sku     = str_replace( [ '<p>', '</p>' ], [
+						'',
+						''
+					], html_entity_decode( $value['display_value'] ) );
+					$sku_key = $value['value'];
 				}
 				// Ge the Removed Trim from product
 				if ( $value['display_key'] === 'Trim Options' ) {
@@ -456,7 +526,8 @@ final class HoodslyHub {
 				}
 
 				// Ge the Removed Trim from product
-				if ( $value['key'] === 'remove_your_trim' ) {
+				$remove_trim_arr = [ 'trim_options_brass_strapping', 'trim_options_walnut_band', 'trim_options_brass_buttons','remove_your_trim' ];
+				if ( in_array( $value['key'], $remove_trim_arr )) {
 					$remove_trim     = str_replace( [ '<p>', '</p>' ], [
 						'',
 						''
@@ -465,41 +536,73 @@ final class HoodslyHub {
 				}
 
 				// Ge the Crown Molding
-				if ( $value['display_key'] === 'Crown Molding (Optional)' ) {
-					$crown_molding     = str_replace( [ '<p>', '</p>' ], [
+				$crown_molding_arr = [ 'brass_crown_molding', 'molding_loose_installed', 'top_strap_steel' ];
+				if ( in_array( $value['key'], $crown_molding_arr ) ) {
+					$molding     = str_replace( [ '<p>', '</p>' ], [
 						'',
 						''
 					], html_entity_decode( $value['display_value'] ) );
-					$crown_molding_key = $value['value'];
+					$molding_key = $value['value'];
 				}
 
 				// Ge the Increase Depth
-				if ( $value['display_key'] === 'Increase Depth' ) {
-					$increase_depth = $value['display_value'];
+				$depth_arr = [ 'curved_depth', 'depth_noncurved', 'vah_19', 'vah_225' ];
+				if ( in_array( $value['key'], $depth_arr ) ) {
+					$increase_depth     = str_replace( [ '<p>', '</p>' ], [
+						'',
+						''
+					], html_entity_decode( $value['display_value'] ) );
+					$increase_depth_key = $value['value'];
 				}
 
-				// Ge the height
-				if ( $value['key'] === 'reduce_height' ) {
-					$height = $value['value'];
-				}
 				// Ge the Reduce height
 				if ( $value['key'] === 'reduce_height' ) {
-					$reduce_height = $value['display_value'];
+					$reduce_height     = str_replace( [ '<p>', '</p>' ], [
+						'',
+						''
+					], html_entity_decode( $value['display_value'] ) );
+					$reduce_height_key = $value['value'];
 				}
 
-				// Ge the SOlid Button Data
-				if ( $value['display_key'] === 'Add A Solid Bottom' ) {
-					$solid_button = $value['display_value'];
+				// Ge the Extended Chimney
+				if ( $value['key'] === 'extend_your_chimney' ) {
+					$extend_chimney     = str_replace( [ '<p>', '</p>' ], [
+						'',
+						''
+					], html_entity_decode( $value['display_value'] ) );
+					$extend_chimney_key = $value['value'];
 				}
 
-				// Ge the Rush Manufacturing data
-				if ( $value['display_key'] === 'Rush Manufacturing' ) {
-					$rush_my_order = $value['display_value'];
+				// Ge the Solid Bottom Data
+				$solid_arr = [ 'solid_bottom_normal_200', 'solid_bottom_corbels'];
+				if ( in_array( $value['key'], $solid_arr ) ) {
+					$solid_button     = str_replace( [ '<p>', '</p>' ], [
+						'',
+						''
+					], html_entity_decode( $value['display_value'] ) );
+					$solid_button_key = $value['value'];
+				}
+
+				// Get the EPO ref for customer
+				if ( $value['key'] === 'reference_for_customer' ) {
+					$reference_for_customer = $rush_my_order = str_replace( [ '<p>', '</p>' ], [
+						'',
+						''
+					], html_entity_decode( $value['display_value'] ) );
 				}
 				// Ge the Rush Manufacturing data
-				if ( $value['display_key'] === 'Extend Your Chimney' ) {
-					$extend_chimney = $value['display_value'];
+				if ( $value['key'] === 'rushed_manufacturing' ) {
+					$rush_my_order     = str_replace( [ '<p>', '</p>' ], [
+						'',
+						''
+					], html_entity_decode( $value['display_value'] ) );
+					$rush_my_order_key = $value['value'];
 				}
+
+				// Ge the height For WRH Condition
+				if ( $value['key'] === 'reduce_height' ) {
+					$height = $value['value'];
+				}// End Condition
 			}
 
 			foreach ( $item_data['meta_data'] as $key => $value ) {
@@ -523,27 +626,29 @@ final class HoodslyHub {
 			preg_match_all( $product_pattern, $product_name, $product_matches );
 			$productName[] = trim( $product_matches[0][0] );
 
-			$new_arr['product_id']             = $item_data['product_id'];
-			$new_arr['product_img_url']        = $product_img_url;
-			$new_arr['product_name']           = $item_data['name'];
-			$new_arr['product_cat']            = $product_cat_slug;
-			$new_arr['sku']                    = $item_sku;
-			$new_arr['item_total']             = $order->get_line_total( $item_values, $inc_tax, $round );
-			$new_arr['item_total_tax']         = $order->get_line_tax( $item_values );
-			$new_arr['variation_id']           = $item_data['variation_id'];
-			$new_arr['quantity']               = $item_data['quantity'];
-			$new_arr['reference_for_customer'] = $reference_for_customer;
-			$new_arr['color']                  = $color;
-			$new_arr['size']                   = [ 'key' => $size_key, 'value' => $size ];
-			$new_arr['sku']                    = $sku;
+			$new_arr['product_id']      = $item_data['product_id'];
+			$new_arr['product_img_url'] = $product_img_url;
+			$new_arr['product_name']    = $item_data['name'];
+			$new_arr['product_cat']     = $product_cat_slug;
+			$new_arr['item_total']      = $order->get_line_total( $item_values, $inc_tax, $round );
+			$new_arr['item_total_tax']  = $order->get_line_tax( $item_values );
+			$new_arr['variation_id']    = $item_data['variation_id'];
+			$new_arr['quantity']        = $item_data['quantity'];
+			$new_arr['color']           = [ 'key' => $color_key, 'value' => $color ];
+			$new_arr['sku']             = [ 'key' => $sku_key, 'value' => $sku ];
+			$new_arr['size']            = [ 'key' => $size_key, 'value' => $size ];
+			/*$new_arr['vent_option']            = [ 'key' => $vent_option_key, 'value' => $vent_option ];
+			$new_arr['z_vent_filter']          = [ 'key' => $zline_filter_key, 'value' => $zline_filter ];
+			$new_arr['z_vent_options']         = [ 'key' => $zline_vent_options_key, 'value' => $zline_vent_options ];*/
 			$new_arr['trim_options']           = [ 'key' => $trim_options_key, 'value' => $trim_options ];
 			$new_arr['remove_trim']            = [ 'key' => $remove_trim_key, 'value' => $remove_trim ];
-			$new_arr['crown_molding']          = [ 'key' => $crown_molding_key, 'value' => $crown_molding ];
-			$new_arr['increase_depth']         = $increase_depth;
-			$new_arr['reduce_height']          = $reduce_height;
-			$new_arr['solid_button']           = $solid_button;
-			$new_arr['rush_my_order']          = $rush_my_order;
-			$new_arr['extend_chimney']         = $extend_chimney;
+			$new_arr['crown_molding']          = [ 'key' => $molding_key, 'value' => $molding ];
+			$new_arr['increase_depth']         = [ 'key' => $increase_depth_key, 'value' => $increase_depth ];
+			$new_arr['reduce_height']          = [ 'key' => $reduce_height_key, 'value' => $reduce_height ];
+			$new_arr['extend_chimney']         = [ 'key' => $extend_chimney_key, 'value' => $extend_chimney ];
+			$new_arr['solid_button']           = [ 'key' => $solid_button_key, 'value' => $solid_button ];
+			$new_arr['reference_for_customer'] = $reference_for_customer;
+			$new_arr['rush_my_order']          = [ 'key' => $rush_my_order_key, 'value' => $rush_my_order ];
 			$new_arr['order_meta']             = $formatted_meta_data_array;
 			$line_items['line_items'][]        = $new_arr;
 
