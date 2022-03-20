@@ -23,7 +23,7 @@ final class HoodslyHub {
 
 	public function __construct() {
 		add_action( 'woocommerce_thankyou', [ $this, 'send_order_data' ], 10, 1 );
-		add_action( 'admin_init', [ $this, 'test_order_data' ] );
+		//add_action( 'admin_init', [ $this, 'test_order_data' ] );
 	}
 
 	/**
@@ -73,7 +73,7 @@ final class HoodslyHub {
 	}
 
 	function test_order_data() {
-		$order_id = intval( 26499 );
+		$order_id = intval( 26502 );
 		$order    = wc_get_order( $order_id );
 
 		$line_items                = array();
@@ -82,6 +82,7 @@ final class HoodslyHub {
 		$order_status              = $order->get_status();
 		$order_status              = wc_get_order_status_name( $order_status );
 		$line_items['order_total'] = $order->get_total();
+		$line_items['total_quantity'] = $order->get_item_count();
 		$product_catSlug           = [];
 		$productName               = [];
 		$reduce_height             = '';
@@ -266,7 +267,7 @@ final class HoodslyHub {
 			$line_items['line_items'][]        = $new_arr;
 
 		}
-		write_log( $line_items );
+		//write_log( $line_items );
 
 		foreach ( $order->get_items( 'shipping' ) as $item_id => $item ) {
 			/* $order_item_name             = $item->get_name();
@@ -375,6 +376,7 @@ final class HoodslyHub {
 		$order_status              = $order->get_status();
 		$order_status              = wc_get_order_status_name( $order_status );
 		$line_items['order_total'] = $order->get_total();
+		$line_items['total_quantity'] = $order->get_item_count();
 		$product_catSlug           = [];
 		$productName               = [];
 		$item_Size                 = '';
@@ -695,7 +697,6 @@ final class HoodslyHub {
 			]
 		];
 
-
 		if ( defined( 'WP_DEBUG' ) ) {
 			$api_url = DEV_ORDER_REST_API;
 		} else {
@@ -724,7 +725,7 @@ final class HoodslyHub {
 		] );
 
 
-		wp_remote_post( $rest_api_url, array(
+		$data = wp_remote_post( $rest_api_url, array(
 			'body' => $data_string
 		) );
 	}
