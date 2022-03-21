@@ -636,7 +636,7 @@ final class HoodslyHub {
 			]
 		];
 
-		if ( defined( 'WP_DEBUG' ) ) {
+		if (defined('WP_DEBUG') && true === WP_DEBUG ) {
 			$api_url = DEV_ORDER_REST_API;
 		} else {
 			$api_url = "https://staging.hoodslyhub.com/wp-json/order-data/v1/hub";
