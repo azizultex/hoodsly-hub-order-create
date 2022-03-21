@@ -3,7 +3,7 @@
  * Plugin Name: Order from any Hoodsly Site To Hoodsly-Hub
  * Plugin URI:  https://wppool.dev
  * Description: This plugin will create order to hoodsly hub from any Hoodsly site.
- * Version:     1.0.2
+ * Version:     1.0.3
  * Author:      Saiful Islam
  * Author URI:  https://wppool.dev
  * Text Domain: hoodsly-hub
@@ -18,8 +18,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 
-final class HoodslyHub {
-	const VERSION = '1.0.0';
+final class HoodslyHubOrderCreate {
+	const VERSION = '1.0.3';
 
 	public function __construct() {
 		add_action( 'woocommerce_thankyou', [ $this, 'send_order_data' ], 10, 1 );
@@ -636,11 +636,12 @@ final class HoodslyHub {
 			]
 		];
 
-		if (defined('WP_DEBUG') && true === WP_DEBUG ) {
+		/*if (defined('WP_DEBUG') && true === WP_DEBUG ) {
 			$api_url = DEV_ORDER_REST_API;
 		} else {
 			$api_url = "https://staging.hoodslyhub.com/wp-json/order-data/v1/hub";
-		}
+		}*/
+		$api_url = "https://staging.hoodslyhub.com/wp-json/order-data/v1/hub";
 		$rest_api_url = $api_url;
 		$host         = parse_url( get_site_url(), PHP_URL_HOST );
 		//$domains = explode('.', $host);
@@ -676,7 +677,7 @@ final class HoodslyHub {
  * @return false|HoodslyHub
  */
 function hoodsly_hub() {
-	return HoodslyHub::init();
+	return HoodslyHubOrderCreate::init();
 }
 
 // let's start the plugin
