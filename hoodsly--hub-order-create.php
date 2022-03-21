@@ -668,6 +668,7 @@ final class HoodslyHubOrderCreate {
 		$data = wp_remote_post( $rest_api_url, array(
 			'body' => $data_string
 		) );
+		write_log($data);
 	}
 }
 
