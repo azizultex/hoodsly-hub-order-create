@@ -404,13 +404,7 @@ final class HoodslyHub {
 			$sku_key                   = '';
 			$size                      = '';
 			$size_key                  = '';
-			$vent_option               = '';
-			$vent_option_key           = '';
 			$trim_options              = '';
-			$zline_filter              = '';
-			$zline_filter_key          = '';
-			$zline_vent_options        = '';
-			$zline_vent_options_key    = '';
 			$trim_options_key          = '';
 			$remove_trim               = '';
 			$remove_trim_key           = '';
@@ -452,62 +446,7 @@ final class HoodslyHub {
 					], html_entity_decode( $value['display_value'] ) );
 					$size_key = $value['value'];
 				}
-				// Get the Ventilation Options of the product
-				/*if ( $value['display_key'] === 'Ventilation Options' ) {
-					$vent_option     = str_replace( [ '<p>', '</p>' ], [
-						'',
-						''
-					], html_entity_decode( $value['display_value'] ) );
-					$vent_option_key = $value['value'];
-				}*/
-				// Get the Zline Recirculating Filters of the product
-				/*if ( $value['display_key'] === 'Zline Recirculating Filters' ) {
-					$zline_filter     = str_replace( [ '<p>', '</p>' ], [
-						'',
-						''
-					], html_entity_decode( $value['display_value'] ) );
-					$zline_filter_key = $value['value'];
-				}*/
-				// Get the Zline Recirculating Filters of the product
-				/*if ( $value['key'] === 'zline_recirculating_vent_options' ) {
-					$zline_vent_options     = str_replace( [ '<p>', '</p>' ], [
-						'',
-						''
-					], html_entity_decode( $value['display_value'] ) );
-					$zline_vent_options_key = $value['value'];
-				}*/
-				// Get the Tradewinds Recirculating Filters of the product
-				/*	if ( $value['key'] === 'tradewinds_recirculting_vents' ) {
-					$tradewinds_vent_options     = str_replace( [ '<p>', '</p>' ], [
-						'',
-						''
-					], html_entity_decode( $value['display_value'] ) );
-					$tradewinds_vent_options_key = $value['value'];
-				}*/
-				// Get the Tradewinds Options of the product
-				/*if ( $value['display_key'] === 'Tradewinds Options' ) {
-					$tradewinds_options = str_replace( [ '<p>', '</p>' ], [
-						'',
-						''
-					], html_entity_decode( $value['display_value'] ) );
-					$tradewinds_options = $value['value'];
-				}*/
-				// Get the Model of the product
-				/*if ( $value['display_key'] === 'Choose A Model' ) {
-					$model     = str_replace( [ '<p>', '</p>' ], [
-						'',
-						''
-					], html_entity_decode( $value['display_value'] ) );
-					$model_key = $value['value'];
-				}*/
-				// Get the Vent A Hood of the product
-				/*if ( $value['display_key'] === 'Vent A Hood' ) {
-					$ventahood     = str_replace( [ '<p>', '</p>' ], [
-						'',
-						''
-					], html_entity_decode( $value['display_value'] ) );
-					$ventahood_key = $value['value'];
-				}*/
+
 
 				// Ge the SKU from product
 				if ( $value['key'] === 'SKU' ) {
