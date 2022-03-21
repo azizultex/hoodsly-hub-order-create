@@ -700,7 +700,7 @@ final class HoodslyHub {
 		if ( defined( 'WP_DEBUG' ) ) {
 			$api_url = DEV_ORDER_REST_API;
 		} else {
-			$api_url = "https://hoodslyhub.com/wp-json/order-data/v1/hub";
+			$api_url = "https://staging.hoodslyhub.com/wp-json/order-data/v1/hub";
 		}
 		$rest_api_url = $api_url;
 		$host         = parse_url( get_site_url(), PHP_URL_HOST );
