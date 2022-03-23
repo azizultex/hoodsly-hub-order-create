@@ -1,92 +1,278 @@
 <?php
+
 /**
- * Plugin Name: Order from any Hoodsly Site To Hoodsly-Hub
- * Plugin URI:  https://wppool.dev
- * Description: This plugin will create order to hoodsly hub from any Hoodsly site.
- * Version:     1.0.3
- * Author:      Saiful Islam
- * Author URI:  https://wppool.dev
- * Text Domain: hoodsly-hub
- * Domain Path: /languages/
- * License:     GPL-2.0+
- * License URI: http://www.gnu.org/licenses/gpl-2.0.txt
+ * The admin-specific functionality of the plugin.
+ *
+ * @link       https://hoodslyhub.com
+ * @since      1.0.0
+ *
+ * @package    HoodslyHub
+ * @subpackage HoodslyHub/admin
  */
 
-
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
-
-
-final class HoodslyHubOrderCreate {
-	const VERSION = '1.0.3';
-
-	public function __construct() {
-		add_action( 'woocommerce_thankyou', [ $this, 'send_order_data' ], 10, 1 );
-		//add_action( 'admin_init', [ $this, 'test_order_data' ] );
-	}
+/**
+ * The admin-specific functionality of the plugin.
+ *
+ * Defines the plugin name, version, and two examples hooks for how to
+ * enqueue the admin-specific stylesheet and JavaScript.
+ *
+ * @package    HoodslyHub
+ * @subpackage HoodslyHub/admin
+ * @author     wppool <info@wppool.dev>
+ */
+class HoodslyHub_Admin {
 
 	/**
-	 * @param $class
-	 * @param $object
+	 * The ID of this plugin.
 	 *
-	 * @return mixed
+	 * @since    1.0.0
+	 * @access   private
+	 * @var      string $plugin_name The ID of this plugin.
 	 */
-	function casttoclass( $class, $object ) {
-		return unserialize( preg_replace( '/^O:\d+:"[^"]++"/', 'O:' . strlen( $class ) . ':"' . $class . '"', serialize( $object ) ) );
-	}
+	private $plugin_name;
 
 	/**
-	 * @param $item_values
+	 * The version of this plugin.
 	 *
-	 * @return mixed
+	 * @since    1.0.0
+	 * @access   private
+	 * @var      string $version The current version of this plugin.
 	 */
-	function hypemill_product_size( $item_values ) {
-		$extraProductOptions       = get_option( 'thwepo_custom_sections' )['default'];
-		$islandHoodOptions         = get_option( 'thwepo_custom_sections' )['island_wood_hood_sizes'];
-		$size_and_ventilation      = $this->casttoclass( 'stdClass', $extraProductOptions );
-		$size_and_ventilation_keys = [];
-		foreach ( $size_and_ventilation->fields as $key => $value ) {
-			if ( $this->casttoclass( 'stdClass', $value )->type === 'select' ) {
-				$size_and_ventilation_keys[] = $key;
-			}
-		}
-		$island_hood = [];
-		foreach ( $islandHoodOptions->fields as $key => $value ) {
-			if ( $value->type === 'select' ) {
-				$island_hood[] = $key;
-			}
-		}
-		$size_keys = array_merge( $size_and_ventilation_keys, $island_hood );
-		foreach ( $size_keys as $size_key ) {
-			$size = $item_values->get_meta( $size_key, true );
-			if ( $size ) {
-				$size = $size;
-				break;
-			}
-		}
-		//preg_match_all('!\d+!', $size, $matches);
-		preg_match( '/(?<=_w_).*/', $size, $match );
+	private $version;
 
-		//$finalSize = $matches[0][0] ."x".$matches[0][1];
-		return $match[0];
-	}
 
+	/**
+	 * The version of this plugin.
+	 *
+	 * @since    1.0.0
+	 * @access   private
+	 * @var      string $version Setting api instance.
+	 */
+	private $settings_api;
+
+
+	/**
+	 * Initialize the class and set its properties.
+	 *
+	 * @param string $plugin_name The name of this plugin.
+	 * @param string $version The version of this plugin.
+	 *
+	 * @since    1.0.0
+	 *
+	 */
+	public function __construct( string $plugin_name, string $version ) {
+		$this->plugin_name = $plugin_name;
+
+		$this->version = $version;
+		if ( defined( 'WP_DEBUG' ) ) {
+			$this->version = current_time( 'timestamp' ); //for development time only
+		}
+
+		$this->settings_api = new HoodslyHub_Settings();
+	}//end constructor
+
+
+	/**
+	 * Register and enqueue admin-specific style sheet.
+	 *
+	 *
+	 * @return    null    Return early if no settings page is registered.
+	 * @since     1.0.0
+	 *
+	 */
+	public function enqueue_styles( $hook ) {
+		$page = isset( $_GET['page'] ) ? esc_attr( wp_unslash( $_GET['page'] ) ) : '';
+
+		global $post_type;
+
+
+		//register css files
+		wp_register_style( 'select2', plugin_dir_url( __FILE__ ) . '../assets/js/select2/css/select2.min.css', array(),
+			$this->version );
+
+		//hoodslyhub admin edit and listing
+
+		wp_register_style( 'hoodslyhub-admin-styles', plugins_url( '../assets/css/HoodslyHub_admin.css', __FILE__ ), array(
+			'select2',
+		), HOODSLYHUB_PLUGIN_VERSION );
+
+
+		//hoodslyhub setting
+		wp_register_style( 'hoodslyhub-admin-setting', plugins_url( '../assets/css/hoodslyhub-admin-setting.css', __FILE__ ),
+			array(
+				'wp-color-picker',
+				'select2',
+			), HOODSLYHUB_PLUGIN_VERSION );
+		if ( $page == 'HoodslyHubsetting' ) {
+
+			wp_enqueue_style( 'wp-color-picker' );
+			wp_enqueue_style( 'select2' );
+
+
+			wp_enqueue_style( 'hoodslyhub-admin-setting' );
+		}
+
+		if ( $page == 'HoodslyHubsetting' ) {
+			wp_register_style( 'hoodslyhub-branding', plugin_dir_url( __FILE__ ) . '../assets/css/hoodslyhub-branding.css',
+				array(),
+				$this->version );
+			wp_enqueue_style( 'hoodslyhub-branding' );
+		}
+
+	}//end of method enqueue_styles
+
+
+	/**
+	 * Register and enqueue admin-specific JavaScript.
+	 *
+	 * @return    null    Return early if no settings page is registered.
+	 * @since     1.0.0
+	 *
+	 */
+	public function enqueue_scripts( $hook ) {
+		$page = isset( $_GET['page'] ) ? esc_attr( wp_unslash( $_GET['page'] ) ) : '';
+
+		global $post_type;
+
+		wp_register_script( 'select2', plugin_dir_url( __FILE__ ) . '../assets/js/select2/js/select2.min.js',
+			array( 'jquery' ), $this->version, true );
+
+		//hoodslyhub setting
+		wp_register_script( 'hoodslyhub-admin-setting', plugins_url( '../assets/js/hoodslyhub-admin-setting.js', __FILE__ ),
+			array(
+				'jquery',
+				'select2',
+				'wp-color-picker'
+			), HOODSLYHUB_PLUGIN_VERSION );
+
+		if ( $page == 'HoodslyHubsetting' ) {
+
+			wp_enqueue_script( 'jquery' );
+			wp_enqueue_script( 'select2' );
+			wp_enqueue_script( 'wp-color-picker' );
+			wp_enqueue_media();
+
+
+			$HoodslyHub_admin_setting_arr = array(
+				'ajaxurl'       => admin_url( 'admin-ajax.php' ),
+				'nonce'         => wp_create_nonce( 'hoodslyhub' ),
+				'please_select' => esc_html__( 'Please select', 'hoodslyhub' )
+			);
+			wp_localize_script( 'hoodslyhub-admin-setting', 'HoodslyHubadminsettingObj', $HoodslyHub_admin_setting_arr );
+			wp_enqueue_script( 'hoodslyhub-admin-setting' );
+		}
+
+		//header scroll
+		wp_register_script( 'hoodslyhub-scroll', plugins_url( '../assets/js/hoodslyhub-scroll.js', __FILE__ ), array( 'jquery' ),
+			HOODSLYHUB_PLUGIN_VERSION );
+		if ( $page == 'HoodslyHubsetting' || $page == 'hoodslyhub-help-support' ) {
+			wp_enqueue_script( 'jquery' );
+			wp_enqueue_script( 'hoodslyhub-scroll' );
+		}
+
+	}//end method enqueue_scripts
+
+	/**
+	 * on admin init initialize setting and handle hoodslyhub type post delete
+	 */
+	public function admin_init() {
+
+		//init setting api
+		$this->settings_api->set_sections( $this->get_setting_sections() );
+		$this->settings_api->set_fields( $this->get_setting_fields() );
+
+		//initialize them
+		$this->settings_api->admin_init();
+
+	}//end method admin_init
+
+
+	/**
+	 * HoodslyHub Core Global Setting Sections
+	 *
+	 * @return mixed|void
+	 */
+	public function get_setting_sections() {
+		$sections = array(
+			array(
+				'id'    => 'AOTHub_global_settings',
+				'title' => esc_html__( 'Default API Settings', 'hoodslyhub' )
+			),
+		);
+
+		return apply_filters( 'AOTHub_setting_sections', $sections );
+	}//end method get_setting_sections
+
+	/**
+	 * HoodslyHub Setting Core Fields
+	 *
+	 * @return mixed|void
+	 */
+	public function get_setting_fields() {
+
+
+		$fields = array(
+			'AOTHub_global_settings' => apply_filters( 'AOTHub_global_general_fields', array(
+				/*'hoodslyhub_defaults_heading' => array(
+					'name'    => 'hoodslyhub_defaults_heading',
+					'label'   => esc_html__( 'Hoodslyhub Default Settings', 'hoodslyhub' ),
+					'type'    => 'heading',
+					'default' => '',
+				),*/
+
+				'hub_endpoint' => array(
+					'name'    => 'hub_endpoint',
+					'label'   => esc_html__( 'Hoodslyhub End point Url', 'hoodslyhub' ),
+					'type'    => 'text',
+					'default' => 'https://hoodslyhub.com/wp-json/order_hold/v1/wrh',
+				),
+
+			) ),
+		);
+
+
+		return apply_filters( 'AOTHub_global_fields', $fields );
+	}//end method get_setting_fields
+
+	/**
+	 *  add setting page menu
+	 */
+	public function admin_menu() {
+		$setting_page_hook = add_menu_page( 'Any order To Hub Settings', esc_html__( 'Any order To Hub', 'hoodslyhub' ),
+			'manage_options', 'HoodslyHubsetting', [ $this, 'admin_menu_setting_page' ], '', 3 );
+
+	}//end method admin_menu
+
+	/**
+	 * Render the settings page for this plugin.
+	 *
+	 * @since    1.0.0
+	 */
+	public function admin_menu_setting_page() {
+		$plugin_data = get_plugin_data( plugin_dir_path( __DIR__ ) . '/../' . HOODSLYHUB_PLUGIN_BASE_NAME );
+		include( 'partials/settings-display.php' );
+	}//end method admin_menu_setting_page
+
+
+	/**
+	 * Test Order for metadata
+	 * @since    1.0.0
+	 */
 	function test_order_data() {
 		$order_id = intval( 26502 );
 		$order    = wc_get_order( $order_id );
 
-		$line_items                = array();
-		$data                      = $order->get_data();
-		$order_date                = $order->order_date;
-		$order_status              = $order->get_status();
-		$order_status              = wc_get_order_status_name( $order_status );
-		$line_items['order_total'] = $order->get_total();
+		$line_items                   = array();
+		$data                         = $order->get_data();
+		$order_date                   = $order->order_date;
+		$order_status                 = $order->get_status();
+		$order_status                 = wc_get_order_status_name( $order_status );
+		$line_items['order_total']    = $order->get_total();
 		$line_items['total_quantity'] = $order->get_item_count();
-		$product_catSlug           = [];
-		$productName               = [];
-		$reduce_height             = '';
-		$item_Size                 = '';
+		$product_catSlug              = [];
+		$productName                  = [];
+		$reduce_height                = '';
+		$item_Size                    = '';
 
 		foreach ( $order->get_items() as $item_key => $item_values ) {
 
@@ -118,8 +304,7 @@ final class HoodslyHubOrderCreate {
 			$solid_button              = '';
 			$rush_my_order             = '';
 			$extend_chimney            = '';
-//write_log($formatted_meta_data_array);
-			$item_Size = $this->hypemill_product_size( $item_values );
+			$item_Size = HoodslyHubHelper::hypemill_product_size( $item_values );
 
 			$terms = get_the_terms( $item_data['product_id'], 'product_cat' );
 			foreach ( $terms as $term ) {
@@ -267,8 +452,6 @@ final class HoodslyHubOrderCreate {
 			$line_items['line_items'][]        = $new_arr;
 
 		}
-		//write_log( $line_items );
-
 		foreach ( $order->get_items( 'shipping' ) as $item_id => $item ) {
 			/* $order_item_name             = $item->get_name();
 			$order_item_type             = $item->get_type();
@@ -329,7 +512,6 @@ final class HoodslyHubOrderCreate {
 		$rest_api_url = $api_url;
 		$host         = parse_url( get_site_url(), PHP_URL_HOST );
 		//$domains = explode('.', $host);
-		//write_log( $product_catSlug );
 		$data_string = json_encode( [
 			'title'                   => '#' . $order_id . '',
 			'order_id'                => intval( $order_id ),
@@ -351,36 +533,29 @@ final class HoodslyHubOrderCreate {
 			//'order_summery'           => $order_summery,
 		] );
 
-	}
+	}// End test_order_data
 
 	/**
-	 * init function for single tone approach
+	 * Order from Hoodsly Site To Hoodsly-Hub
 	 *
-	 * @return false|HoodslyHub
+	 * @param $order_id
+	 * @since    1.0.0
+	 *
 	 */
-	public static function init() {
-		static $instance = false;
-		if ( ! $instance ) {
-			$instance = new self();
-		}
-
-		return $instance;
-	}
-
 	public function send_order_data( $order_id ) {
 		$order = wc_get_order( $order_id );
 
-		$line_items                = array();
-		$data                      = $order->get_data();
-		$order_date                = $order->order_date;
-		$order_status              = $order->get_status();
-		$order_status              = wc_get_order_status_name( $order_status );
-		$line_items['order_total'] = $order->get_total();
+		$line_items                   = array();
+		$data                         = $order->get_data();
+		$order_date                   = $order->order_date;
+		$order_status                 = $order->get_status();
+		$order_status                 = wc_get_order_status_name( $order_status );
+		$line_items['order_total']    = $order->get_total();
 		$line_items['total_quantity'] = $order->get_item_count();
-		$product_catSlug           = [];
-		$productName               = [];
-		$item_Size                 = '';
-		$height                    = '';
+		$product_catSlug              = [];
+		$productName                  = [];
+		$item_Size                    = '';
+		$height                       = '';
 		foreach ( $order->get_items() as $item_key => $item_values ) {
 
 			$product           = wc_get_product( $item_values->get_product_id() );
@@ -390,7 +565,6 @@ final class HoodslyHubOrderCreate {
 			preg_match_all( $pattern, $product_image_url, $matches );
 			$product_img_url = $matches[0][0];
 
-			//write_log($product_img_url);
 			$item_sku                  = $product->get_sku();
 			$item_data                 = $item_values->get_data();
 			$new_arr                   = [];
@@ -422,7 +596,7 @@ final class HoodslyHubOrderCreate {
 			$rush_my_order_key         = '';
 
 
-			$item_Size = $this->hypemill_product_size( $item_values );
+			$item_Size = HoodslyHubHelper::hypemill_product_size( $item_values );
 			$terms     = get_the_terms( $item_data['product_id'], 'product_cat' );
 			foreach ( $terms as $term ) {
 				// Categories by slug
@@ -467,8 +641,8 @@ final class HoodslyHubOrderCreate {
 				}
 
 				// Ge the Removed Trim from product
-				$remove_trim_arr = [ 'trim_options_brass_strapping', 'trim_options_walnut_band', 'trim_options_brass_buttons','remove_your_trim' ];
-				if ( in_array( $value['key'], $remove_trim_arr )) {
+				$remove_trim_arr = [ 'trim_options_brass_strapping', 'trim_options_walnut_band', 'trim_options_brass_buttons', 'remove_your_trim' ];
+				if ( in_array( $value['key'], $remove_trim_arr ) ) {
 					$remove_trim     = str_replace( [ '<p>', '</p>' ], [
 						'',
 						''
@@ -515,7 +689,7 @@ final class HoodslyHubOrderCreate {
 				}
 
 				// Ge the Solid Bottom Data
-				$solid_arr = [ 'solid_bottom_normal_200', 'solid_bottom_corbels'];
+				$solid_arr = [ 'solid_bottom_normal_200', 'solid_bottom_corbels' ];
 				if ( in_array( $value['key'], $solid_arr ) ) {
 					$solid_button     = str_replace( [ '<p>', '</p>' ], [
 						'',
@@ -600,7 +774,7 @@ final class HoodslyHubOrderCreate {
 			$shipping_method_id    = $item->get_method_id(); // The method ID
 			$shipping_method_title = $item->get_method_title();
 		}
-		$details_data = [
+		$details_data       = [
 			'payment_method'       => $data['payment_method'],
 			'payment_method_title' => $data['payment_method_title'],
 			'customer_note'        => $data['customer_note'],
@@ -635,15 +809,10 @@ final class HoodslyHubOrderCreate {
 				'total'        => $shipping_method_total
 			]
 		];
-
-		/*if (defined('WP_DEBUG') && true === WP_DEBUG ) {
-			$api_url = DEV_ORDER_REST_API;
-		} else {
-			$api_url = "https://staging.hoodslyhub.com/wp-json/order-data/v1/hub";
-		}*/
-		$api_url = "https://staging.hoodslyhub.com/wp-json/order-data/v1/hub";
-		$rest_api_url = $api_url;
-		$host         = parse_url( get_site_url(), PHP_URL_HOST );
+		$this->settings_api = new hoodslyhub_Settings();
+		$hub_endpoint       = $this->settings_api->get_option( 'hub_endpoint', 'AOTHub_global_settings', 'text' );
+		$rest_api_url       = $hub_endpoint;
+		$host = parse_url( get_site_url(), PHP_URL_HOST );
 		//$domains = explode('.', $host);
 		$data_string = json_encode( [
 			'title'                   => '#' . $order_id . '',
@@ -664,22 +833,9 @@ final class HoodslyHubOrderCreate {
 			'custom_color_match'      => $custom_color_match,
 		] );
 
-
 		$data = wp_remote_post( $rest_api_url, array(
 			'body' => $data_string
 		) );
-		write_log($data);
-	}
-}
+	}// End send_order_data
 
-/**
- * initialise the main function
- *
- * @return false|HoodslyHub
- */
-function hoodsly_hub() {
-	return HoodslyHubOrderCreate::init();
-}
-
-// let's start the plugin
-hoodsly_hub();
+}//end class HoodslyHub
