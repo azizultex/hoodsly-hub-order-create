@@ -9,7 +9,7 @@
  * Plugin Name: Order from any Hoodsly Site To Hoodsly-Hub
  * Plugin URI:  https://wppool.dev
  * Description: This plugin will create order to hoodsly hub from any Hoodsly site.
- * Version:     1.0.3
+ * Version:     1.0.4
  * Author:      Saiful Islam
  * Author URI:  https://wppool.dev
  * Text Domain: hoodslyhub
@@ -25,7 +25,7 @@ if ( ! defined( 'WPINC' ) ) {
 
 //plugin definition specific constants
 defined( 'HOODSLYHUB_PLUGIN_NAME' ) or define( 'HOODSLYHUB_PLUGIN_NAME', 'hoodslyhub' );
-defined( 'HOODSLYHUB_PLUGIN_VERSION' ) or define( 'HOODSLYHUB_PLUGIN_VERSION', '1.0.3' );
+defined( 'HOODSLYHUB_PLUGIN_VERSION' ) or define( 'HOODSLYHUB_PLUGIN_VERSION', '1.0.4' );
 defined( 'HOODSLYHUB_PLUGIN_BASE_NAME' ) or define( 'HOODSLYHUB_PLUGIN_BASE_NAME', plugin_basename( __FILE__ ) );
 defined( 'HOODSLYHUB_PLUGIN_ROOT_PATH' ) or define( 'HOODSLYHUB_PLUGIN_ROOT_PATH', plugin_dir_path( __FILE__ ) );
 defined( 'HOODSLYHUB_PLUGIN_ROOT_URL' ) or define( 'HOODSLYHUB_PLUGIN_ROOT_URL', plugin_dir_url( __FILE__ ) );

@@ -224,7 +224,7 @@ class HoodslyHub_Admin {
 					'name'    => 'hub_endpoint',
 					'label'   => esc_html__( 'Hoodslyhub End point Url', 'hoodslyhub' ),
 					'type'    => 'text',
-					'default' => 'https://hoodslyhub.com/wp-json/order_hold/v1/wrh',
+					'default' => 'https://hoodslyhub.com/wp-json/order-data/v1/hub',
 				),
 
 			) ),
