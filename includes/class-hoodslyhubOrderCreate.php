@@ -168,7 +168,7 @@ class hoodslyhubOrderCreate {
 
 		$this->loader->add_action( 'woocommerce_thankyou', $plugin_admin, 'send_order_data', 10, 1 );
 		$this->loader->add_action( 'woocommerce_order_status_changed', $plugin_admin, 'send_order_status', 10, 1 );
-		//$this->loader->add_action( 'init', $plugin_admin, 'test_order_data', 10, 1 );
+		//$this->loader->add_action( 'admin_init', $plugin_admin, 'test_order_data', 10, 1 );
 
 	}
 

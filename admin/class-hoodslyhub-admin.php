@@ -265,7 +265,7 @@ class HoodslyHub_Admin {
 	 * @since    1.0.0
 	 */
 	function test_order_data() {
-		$order_id = intval( 26502 );
+		$order_id = intval( 26380 );
 		$order    = wc_get_order( $order_id );
 
 		$line_items                   = array();
@@ -319,6 +319,10 @@ class HoodslyHub_Admin {
 			}
 
 			foreach ( $formatted_meta_data_array as $value ) {
+				if($value['display_key'] == 'Ventilation Options'){
+					$is_tradewinds_selected = 'yes';
+				}
+				
 				if ( $value['key'] === 'pa_color' ) {
 					$color     = str_replace( [ '<p>', '</p>' ], [
 						'',
@@ -610,6 +614,11 @@ class HoodslyHub_Admin {
 			}
 
 			foreach ( $formatted_meta_data_array as $value ) {
+
+				if($value['display_key'] == 'Ventilation Options'){
+					$is_tradewinds_selected = 'yes';
+				}
+
 				if ( $value['key'] === 'pa_color' ) {
 					$color     = str_replace( [ '<p>', '</p>' ], [
 						'',
@@ -837,6 +846,7 @@ class HoodslyHub_Admin {
 			'product_sku'             => $item_sku,
 			'order_status'            => $order_status,
 			'custom_color_match'      => $custom_color_match,
+			'is_tradewinds_selected'      => $is_tradewinds_selected,
 		] );
 
 		$data = wp_remote_post( $rest_api_url, array(
@@ -851,7 +861,6 @@ class HoodslyHub_Admin {
 	 * @param $order_id
 	 */
 	public function send_order_status( $order_id) {
-		write_log('Trigger order status hook');
 		$order = wc_get_order( $order_id );
 
 		$line_items                   = array();
