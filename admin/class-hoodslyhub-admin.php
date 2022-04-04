@@ -265,7 +265,7 @@ class HoodslyHub_Admin {
 	 * @since    1.0.0
 	 */
 	function test_order_data() {
-		$order_id = intval( 26380 );
+		$order_id = intval( 26392 );
 		$order    = wc_get_order( $order_id );
 
 		$line_items                   = array();
@@ -351,6 +351,8 @@ class HoodslyHub_Admin {
 						'',
 						''
 					], html_entity_decode( $value['display_value'] ) );;
+					
+					$tradewinds_sku = explode('-', $sku);
 				}
 				// Ge the Removed Trim from product
 				if ( $value['display_key'] === 'Trim Options' ) {
@@ -644,6 +646,7 @@ class HoodslyHub_Admin {
 						''
 					], html_entity_decode( $value['display_value'] ) );
 					$sku_key = $value['value'];
+					$tradewinds_sku = explode('-', $sku);
 				}
 				// Ge the Removed Trim from product
 				if ( $value['display_key'] === 'Trim Options' ) {
@@ -757,6 +760,7 @@ class HoodslyHub_Admin {
 			$productName[] = trim( $product_matches[0][0] );
 
 			$new_arr['product_id']      = $item_data['product_id'];
+			$new_arr['tradewinds_sku']      = $tradewinds_sku[0];
 			$new_arr['product_img_url'] = $product_img_url;
 			$new_arr['product_name']    = $item_data['name'];
 			$new_arr['product_cat']     = $product_cat_slug;
