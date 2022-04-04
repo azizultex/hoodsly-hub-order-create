@@ -244,7 +244,7 @@ class HoodslyHub_Admin {
 	 *  add setting page menu
 	 */
 	public function admin_menu() {
-		$setting_page_hook = add_menu_page( 'Any order To Hub Settings', esc_html__( 'Any order To Hub', 'hoodslyhub' ),
+		$setting_page_hook = add_menu_page( 'Hoodsluyhub Order Manager', esc_html__( 'Hub Order Manager', 'hoodslyhub' ),
 			'manage_options', 'HoodslyHubsetting', [ $this, 'admin_menu_setting_page' ], '', 3 );
 
 	}//end method admin_menu
