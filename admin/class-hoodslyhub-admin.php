@@ -743,6 +743,8 @@ class HoodslyHub_Admin {
 				if ( $value->get_data()['key'] == 'pa_color' ) {
 					if ( $value->get_data()['value'] == 'custom-color-match' ) {
 						$custom_color_match = true;
+					}else{
+						$custom_color_match = '0';
 					}
 				}
 			}
