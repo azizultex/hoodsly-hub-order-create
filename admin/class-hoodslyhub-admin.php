@@ -279,6 +279,18 @@ class HoodslyHub_Admin {
 		$productName                  = [];
 		$reduce_height                = '';
 		$item_Size                    = '';
+		/* $args = array(
+			'posts_per_page'     => -1,
+			'post_type'          => 'product_variation',
+			'suppress_filters'   => true
+		);
+	
+		$posts_array = get_posts( $args );
+	
+		foreach ( $posts_array as $post_array ) {
+			$Cogcost = get_post_meta( $post_array->ID, '_regular_price', true );
+			write_log($Cogcost);
+		} */
 		
 		foreach ( $order->get_items() as $item_key => $item_values ) {
 
@@ -295,7 +307,24 @@ class HoodslyHub_Admin {
 			$item_meta_data      = $item_values->get_meta_data();
 			$formatted_meta_data = $item_values->get_formatted_meta_data( '_', true );
 
-			write_log($formatted_meta_data);
+			$variations = $product->get_available_variations();
+			$variation_formatted_array = array();
+			foreach($variations as $variation){
+				 $variation_id = $variation['variation_id'];
+				 $variation_obj = new WC_Product_variation($variation_id);
+				 $stock = $variation_obj->get_stock_quantity();
+				 //write_log($variation_id);
+				 $new_arr = array();
+				 $new_arr[]['_attributes'] = $variation_obj->get_attributes();
+				 $new_arr[]['variation_id'] = $variation_id;
+				 $variation_formatted_array[] = $new_arr;
+			}
+			//$product = wc_get_product($product_id);
+			$variations = $product->get_available_variations();
+			$variations_id = wp_list_pluck( $variations, 'variation_id' );
+			write_log($variation_formatted_array);
+
+			//write_log($formatted_meta_data);
 			$formatted_meta_data_array = json_decode( json_encode( $formatted_meta_data ), true );
 			$reference_for_customer    = '';
 			$sku                       = '';
@@ -480,7 +509,7 @@ class HoodslyHub_Admin {
 			$line_items['line_items'][]        = $new_arr;
 
 		}
-		write_log($line_items);
+		//write_log($line_items);
 		foreach ( $order->get_items( 'shipping' ) as $item_id => $item ) {
 			/* $order_item_name             = $item->get_name();
 			$order_item_type             = $item->get_type();
