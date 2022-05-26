@@ -265,7 +265,7 @@ class HoodslyHub_Admin {
 	 * @since    1.0.0
 	 */
 	function test_order_data() {
-		$order_id = intval( 26411 );
+		$order_id = intval( 26456 );
 		$order    = wc_get_order( $order_id );
 
 		$line_items                   = array();
@@ -293,7 +293,7 @@ class HoodslyHub_Admin {
 		} */
 		
 		foreach ( $order->get_items() as $item_key => $item_values ) {
-
+			
 			$product           = wc_get_product( $item_values->get_product_id() );
 			$product_image     = apply_filters( 'woocommerce_order_item_product', $order->get_product_from_item( $item_values ), $item_values );
 			$product_image_url = $product_image->get_image();
@@ -302,6 +302,7 @@ class HoodslyHub_Admin {
 			$product_img_url = $matches[0][0];
 
 			$item_sku            = $product->get_sku();
+			write_log($item_sku);
 			$item_data           = $item_values->get_data();
 			$new_arr             = [];
 			$item_meta_data      = $item_values->get_meta_data();
@@ -322,7 +323,6 @@ class HoodslyHub_Admin {
 			//$product = wc_get_product($product_id);
 			$variations = $product->get_available_variations();
 			$variations_id = wp_list_pluck( $variations, 'variation_id' );
-			write_log($variation_formatted_array);
 
 			//write_log($formatted_meta_data);
 			$formatted_meta_data_array = json_decode( json_encode( $formatted_meta_data ), true );
@@ -653,7 +653,7 @@ class HoodslyHub_Admin {
 			$solid_button_key          = '';
 			$rush_my_order             = '';
 			$rush_my_order_key         = '';
-
+			$stock_quantity= $product->get_stock_quantity();
 			$tradewinds_cat_sku = get_post_meta( $item_data['variation_id'], '_sku', true );
 			$item_Size = HoodslyHubHelper::hypemill_product_size( $item_values );
 			$terms     = get_the_terms( $item_data['product_id'], 'product_cat' );
@@ -913,6 +913,7 @@ class HoodslyHub_Admin {
 			'order_status'            => $order_status,
 			'custom_color_match'      => $custom_color_match,
 			'is_tradewinds_selected'      => $is_tradewinds_selected,
+			'stock_quantity'      => $stock_quantity,
 		] );
 
 		$data = wp_remote_post( $rest_api_url, array(
@@ -1215,6 +1216,7 @@ class HoodslyHub_Admin {
 			'product_sku'             => $item_sku,
 			'order_status'            => $order_status,
 			'custom_color_match'      => $custom_color_match,
+			'shipping_state'      => $data['shipping']['state'],
 		] );
 
 		$data = wp_remote_post( $rest_api_url, array(
