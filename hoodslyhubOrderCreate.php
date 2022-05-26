@@ -6,7 +6,7 @@
  * @package           hoodslyhub
  *
  * @wordpress-plugin
- * Plugin Name: Hoodsluyhub Order Manager
+ * Plugin Name: Hub Order Manager
  * Plugin URI:  https://wppool.dev
  * Description: This plugin will create order to hoodsly hub from any Hoodsly site.
  * Version:     1.0.6
