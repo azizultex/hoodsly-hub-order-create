@@ -305,7 +305,6 @@ class HoodslyHub_Admin {
 				'length' => $product->get_length(),
 				'height' => $product->get_height(),
 			];
-			write_log($ups_req_data);
 			$item_data           = $item_values->get_data();
 			$new_arr             = [];
 			$item_meta_data      = $item_values->get_meta_data();
