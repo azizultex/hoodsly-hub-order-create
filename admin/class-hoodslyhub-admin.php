@@ -213,13 +213,6 @@ class HoodslyHub_Admin {
 
 		$fields = array(
 			'AOTHub_global_settings' => apply_filters( 'AOTHub_global_general_fields', array(
-				/*'hoodslyhub_defaults_heading' => array(
-					'name'    => 'hoodslyhub_defaults_heading',
-					'label'   => esc_html__( 'Hoodslyhub Default Settings', 'hoodslyhub' ),
-					'type'    => 'heading',
-					'default' => '',
-				),*/
-
 				'hub_endpoint'              => array(
 					'name'    => 'hub_endpoint',
 					'label'   => esc_html__( 'Hoodslyhub End point ', 'hoodslyhub' ),
@@ -232,7 +225,6 @@ class HoodslyHub_Admin {
 					'type'    => 'text',
 					'default' => 'https://hoodslyhub.com/wp-json/order-status/v1/hub',
 				),
-
 			) ),
 		);
 
@@ -265,7 +257,7 @@ class HoodslyHub_Admin {
 	 * @since    1.0.0
 	 */
 	function test_order_data() {
-		$order_id = intval( 26597 );
+		$order_id = intval( 26459 );
 		$order    = wc_get_order( $order_id );
 
 		$line_items                   = array();
@@ -296,7 +288,7 @@ class HoodslyHub_Admin {
 		foreach ( $order->get_items() as $item_key => $item_values ) {
 
 			$product           = wc_get_product( $item_values->get_product_id() );
-			$product_image     = apply_filters( 'woocommerce_order_item_product', $order->get_product_from_item( $item_values ), $item_values );
+			//$product_image     = apply_filters( 'woocommerce_order_item_product', $order->get_product_from_item( $item_values ), $item_values );
 			$product_image_url = $product_image->get_image();
 			$pattern           = "/(?:(?:https?|ftp|file):\/\/|www\.|ftp\.)(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[-A-Z0-9+&@#\/%=~_|$?!:,.])*(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[A-Z0-9+&@#\/%=~_|$])/i";
 			preg_match_all( $pattern, $product_image_url, $matches );
@@ -304,6 +296,16 @@ class HoodslyHub_Admin {
 
 			$item_sku = $product->get_sku();
 
+			$ups_req_data = [
+				'woocommerce_dimension_unit' => get_option('woocommerce_dimension_unit'),
+				'woocommerce_weight_unit' => get_option('woocommerce_weight_unit'),
+				'weight' => $product->get_weight(),
+				'length' => $product->get_length(),
+				'width' => $product->get_width(),
+				'length' => $product->get_length(),
+				'height' => $product->get_height(),
+			];
+			write_log($ups_req_data);
 			$item_data           = $item_values->get_data();
 			$new_arr             = [];
 			$item_meta_data      = $item_values->get_meta_data();
@@ -512,22 +514,22 @@ class HoodslyHub_Admin {
 
 		}
 
-		foreach ( $order->get_items( 'shipping' ) as $item_id => $item ) {
-			/* $order_item_name             = $item->get_name();
+		/* foreach ( $order->get_items( 'shipping' ) as $item_id => $item ) {
+			$order_item_name             = $item->get_name();
 			$order_item_type             = $item->get_type();
 			$shipping_method_id          = $item->get_method_id(); // The method ID
 			$shipping_method_instance_id = $item->get_instance_id(); // The instance ID
 			$shipping_method_total_tax   = $item->get_total_tax();
-			$shipping_method_taxes       = $item->get_taxes(); */
+			$shipping_method_taxes       = $item->get_taxes();
 
 			$shipping_method_total = $item->get_total();
 			$shipping_method_id    = $item->get_method_id(); // The method ID
 			$shipping_method_title = $item->get_method_title();
-		}
+		} */
 		/* $data = $order->get_data();
 		$endpoint = 'https://hoodslyhub.com/wp-json/wc/v3/orders/'; */
 
-		$details_data = [
+		/* $details_data = [
 			'payment_method'       => $data['payment_method'],
 			'payment_method_title' => $data['payment_method_title'],
 			'customer_note'        => $data['customer_note'],
@@ -561,18 +563,18 @@ class HoodslyHub_Admin {
 				'method_title' => $shipping_method_title,
 				'total'        => $shipping_method_total
 			]
-		];
+		]; */
 
 
-		if ( defined( 'WP_DEBUG' ) ) {
+		/* if ( defined( 'WP_DEBUG' ) ) {
 			$api_url = DEV_ORDER_REST_API;
 		} else {
 			$api_url = "https://hoodslyhub.com/wp-json/order-data/v1/hub";
 		}
 		$rest_api_url = $api_url;
-		$host         = parse_url( get_site_url(), PHP_URL_HOST );
+		$host         = parse_url( get_site_url(), PHP_URL_HOST ); */
 		//$domains = explode('.', $host);
-		$data_string = json_encode( [
+		/* $data_string = json_encode( [
 			'title'                   => '#' . $order_id . '',
 			'order_id'                => intval( $order_id ),
 			'data'                    => $details_data,
@@ -593,7 +595,7 @@ class HoodslyHub_Admin {
 			'order_status'            => $order_status,
 			'custom_color_match'      => $custom_color_match,
 			//'order_summery'           => $order_summery,
-		] );
+		] ); */
 
 	}// End test_order_data
 
@@ -628,6 +630,14 @@ class HoodslyHub_Admin {
 			$pattern           = "/(?:(?:https?|ftp|file):\/\/|www\.|ftp\.)(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[-A-Z0-9+&@#\/%=~_|$?!:,.])*(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[A-Z0-9+&@#\/%=~_|$])/i";
 			preg_match_all( $pattern, $product_image_url, $matches );
 			$product_img_url = $matches[0][0];
+			$ups_req_data = [
+				'woocommerce_dimension_unit' => get_option('woocommerce_dimension_unit'),
+				'woocommerce_weight_unit' => get_option('woocommerce_weight_unit'),
+				'weight' => $product->get_weight(),
+				'width' => $product->get_width(),
+				'length' => $product->get_length(),
+				'height' => $product->get_height(),
+			];
 
 			$item_sku                  = $product->get_sku();
 			$item_data                 = $item_values->get_data();
@@ -925,6 +935,7 @@ class HoodslyHub_Admin {
 			'custom_color_match'      => $custom_color_match,
 			'is_tradewinds_selected'  => $is_tradewinds_selected,
 			'stock_quantity'          => $stock_quantity,
+			'ups_req_data'            => $ups_req_data,
 		] );
 
 		$data = wp_remote_post( $rest_api_url, array(
