@@ -256,8 +256,8 @@ class HoodslyHub_Admin {
 	 * Test Order for metadata
 	 * @since    1.0.0
 	 */
-	function test_order_data() {
-		$order_id = intval( 26459 );
+	function test_order_data($order_id) {
+		$order_id = intval( 26467 );
 		$order    = wc_get_order( $order_id );
 
 		$line_items                   = array();
@@ -288,7 +288,7 @@ class HoodslyHub_Admin {
 		foreach ( $order->get_items() as $item_key => $item_values ) {
 
 			$product           = wc_get_product( $item_values->get_product_id() );
-			//$product_image     = apply_filters( 'woocommerce_order_item_product', $order->get_product_from_item( $item_values ), $item_values );
+			$product_image     = apply_filters( 'woocommerce_order_item_product', $order->get_product_from_item( $item_values ), $item_values );
 			$product_image_url = $product_image->get_image();
 			$pattern           = "/(?:(?:https?|ftp|file):\/\/|www\.|ftp\.)(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[-A-Z0-9+&@#\/%=~_|$?!:,.])*(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[A-Z0-9+&@#\/%=~_|$])/i";
 			preg_match_all( $pattern, $product_image_url, $matches );
@@ -310,7 +310,7 @@ class HoodslyHub_Admin {
 			$item_meta_data      = $item_values->get_meta_data();
 			$formatted_meta_data = $item_values->get_formatted_meta_data( '_', true );
 
-			$variations                = $product->get_available_variations();
+			/* $variations                = $product->get_available_variations();
 			$variation_formatted_array = array();
 			foreach ( $variations as $variation ) {
 				$variation_id  = $variation['variation_id'];
@@ -324,7 +324,7 @@ class HoodslyHub_Admin {
 			}
 			//$product = wc_get_product($product_id);
 			$variations    = $product->get_available_variations();
-			$variations_id = wp_list_pluck( $variations, 'variation_id' );
+			$variations_id = wp_list_pluck( $variations, 'variation_id' ); */
 
 
 			$formatted_meta_data_array = json_decode( json_encode( $formatted_meta_data ), true );
@@ -484,7 +484,8 @@ class HoodslyHub_Admin {
 			$product_name    = $item_values['name'];
 			$product_pattern = "/[\s\S]*?(?=-)/i";
 			preg_match_all( $product_pattern, $product_name, $product_matches );
-			$productName[]                     = trim( $product_matches[0][0] );
+			$productName               = trim( $product_matches[0][0] );
+			//write_log($productName);
 			$new_arr['product_id']             = $item_data['product_id'];
 			$new_arr['product_img_url']        = $product_img_url;
 			$new_arr['product_name']           = $item_data['name'];
@@ -510,8 +511,9 @@ class HoodslyHub_Admin {
 			$new_arr['reference_for_customer'] = $reference_for_customer;
 			$new_arr['order_meta']             = $formatted_meta_data_array;
 			$line_items['line_items'][]        = $new_arr;
-
+			//$productName = $item_data['name'];
 		}
+		
 
 		/* foreach ( $order->get_items( 'shipping' ) as $item_id => $item ) {
 			$order_item_name             = $item->get_name();
@@ -833,7 +835,7 @@ class HoodslyHub_Admin {
 			$product_name    = $item_values['name'];
 			$product_pattern = "/[\s\S]*?(?=-)/i";
 			preg_match_all( $product_pattern, $product_name, $product_matches );
-			$productName[] = trim( $product_matches[0][0] );
+			$productName = trim( $product_matches[0][0] );
 
 			$new_arr['product_id']           = $item_data['product_id'];
 			$new_arr['tradewinds_sku']       = $tradewinds_sku[0];
@@ -865,6 +867,7 @@ class HoodslyHub_Admin {
 			$new_arr['rush_my_order']          = [ 'key' => $rush_my_order_key, 'value' => $rush_my_order ];
 			$new_arr['order_meta']             = $formatted_meta_data_array;
 			$line_items['line_items'][]        = $new_arr;
+			//$productName = $item_data['name'];
 
 		}
 		foreach ( $order->get_items( 'shipping' ) as $item_id => $item ) {
