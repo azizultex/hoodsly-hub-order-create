@@ -257,7 +257,7 @@ class HoodslyHub_Admin {
 	 * @since    1.0.0
 	 */
 	function test_order_data($order_id) {
-		$order_id = intval( 26467 );
+		$order_id = intval(26476);
 		$order    = wc_get_order( $order_id );
 
 		$line_items                   = array();
@@ -353,7 +353,13 @@ class HoodslyHub_Admin {
 			}
 
 			foreach ( $formatted_meta_data_array as $value ) {
-				if ( $value['display_value'] == 'TradeWinds Select For Pricing' ) {
+				$display_value = str_replace( [ '<p>', '</p>' ], [
+					'',
+					''
+				], html_entity_decode( $value['display_value'] ) );
+				//write_log($value['display_value']);
+				//$is_tradewinds_selected = 'no';
+				if ( trim($display_value) == 'TradeWinds Select For Pricing' ) {
 					$is_tradewinds_selected = 'yes';
 				}
 
@@ -464,7 +470,7 @@ class HoodslyHub_Admin {
 					], html_entity_decode( $value['display_value'] ) );;
 				}
 			}
-
+			write_log($is_tradewinds_selected);
 			foreach ( $item_data['meta_data'] as $key => $value ) {
 
 				if ( $value->get_data()['key'] == 'pa_color' ) {
@@ -623,6 +629,10 @@ class HoodslyHub_Admin {
 		$productName                  = [];
 		$item_Size                    = '';
 		$height                       = '';
+
+		$user = $order->get_user();
+        // Get the WP_User roles and capabilities
+        $user_roles = $user->roles[0];
 		foreach ( $order->get_items() as $item_key => $item_values ) {
 
 			$product           = wc_get_product( $item_values->get_product_id() );
@@ -680,7 +690,11 @@ class HoodslyHub_Admin {
 			}
 
 			foreach ( $formatted_meta_data_array as $value ) {
-				if ( $value['display_value'] == 'TradeWinds Select For Pricing' ) {
+				$display_value = str_replace( [ '<p>', '</p>' ], [
+					'',
+					''
+				], html_entity_decode( $value['display_value'] ) );
+				if ( trim($display_value) == 'TradeWinds Select For Pricing' ) {
 					$is_tradewinds_selected = 'yes';
 				}
 
@@ -938,6 +952,7 @@ class HoodslyHub_Admin {
 			'is_tradewinds_selected'  => $is_tradewinds_selected,
 			'stock_quantity'          => $stock_quantity,
 			'ups_req_data'            => $ups_req_data,
+			'user_roles'              => $user_roles,
 		] );
 
 		$data = wp_remote_post( $rest_api_url, array(
