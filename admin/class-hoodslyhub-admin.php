@@ -680,7 +680,7 @@ class HoodslyHub_Admin {
 			$solid_button_key          = '';
 			$rush_my_order             = '';
 			$rush_my_order_key         = '';
-			$tradewinds_sku            = ''
+			$tradewinds_sku            = '';
 			$stock_quantity            = $product->get_stock_quantity();
 			$tradewinds_cat_sku        = get_post_meta( $item_data['variation_id'], '_sku', true );
 			$item_Size                 = HoodslyHubHelper::hypemill_product_size( $item_values );
