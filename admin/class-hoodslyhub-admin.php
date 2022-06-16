@@ -472,7 +472,7 @@ class HoodslyHub_Admin {
 					], html_entity_decode( $value['display_value'] ) );;
 				}
 			}
-			write_log( $is_tradewinds_selected );
+			//write_log( $is_tradewinds_selected );
 			foreach ( $item_data['meta_data'] as $key => $value ) {
 
 				if ( $value->get_data()['key'] == 'pa_color' ) {
@@ -595,28 +595,28 @@ class HoodslyHub_Admin {
 			$tradewinds_sku_data = trim($tradewinds_sku[0]);
 		}
 		//write_log($tradewinds_sku_data);
-		 $data_string = json_encode( [
-			'title'                   => '#' . $order_id . '',
-			'order_id'                => intval( $order_id ),
-			'data'                    => $details_data,
-			'content'                 => '#' . $order_id . '<br>' . $data['shipping']['first_name'] . ' ' . $data['billing']['last_name'] . '<br>' . $data['billing']['email'] . '<br>' . $data['billing']['phone'] . '<br>' . $data['shipping']['address_1'] . $data['shipping']['address_2'] . ' ,' . $data['shipping']['city'] . ' ,' . $data['shipping']['state'] . ' ' . $data['shipping']['postcode'] . '',
-			'status'                  => 'publish',
-			'estimated_shipping_date' => get_post_meta( $order_id, 'estimated_shipping_date', true ),
-			//'bill_of_landing_id'      => get_post_meta( $order_id, 'bill_of_landing_id', true ),
-			'origin'                  => $host,
-			'order_date'              => $order_date,
-			'meta_data'               => $formatted_meta_data,
-			'product_height'          => $item_Size,
-			'product_name'            => $productName,
-			'reduce_height'           => $reduce_height,
-			'product_cat'             => $product_catSlug,
-			'product_catName'         => $product_catName,
-			'tradewinds_quickship'    => $tradewinds_quickship,
-			'product_sku'             => $item_sku,
-			'order_status'            => $order_status,
-			'custom_color_match'      => $custom_color_match,
-			//'order_summery'           => $order_summery,
-		] );
+//		 $data_string = json_encode( [
+//			'title'                   => '#' . $order_id . '',
+//			'order_id'                => intval( $order_id ),
+//			'data'                    => $details_data,
+//			'content'                 => '#' . $order_id . '<br>' . $data['shipping']['first_name'] . ' ' . $data['billing']['last_name'] . '<br>' . $data['billing']['email'] . '<br>' . $data['billing']['phone'] . '<br>' . $data['shipping']['address_1'] . $data['shipping']['address_2'] . ' ,' . $data['shipping']['city'] . ' ,' . $data['shipping']['state'] . ' ' . $data['shipping']['postcode'] . '',
+//			'status'                  => 'publish',
+//			'estimated_shipping_date' => get_post_meta( $order_id, 'estimated_shipping_date', true ),
+//			//'bill_of_landing_id'      => get_post_meta( $order_id, 'bill_of_landing_id', true ),
+//			'origin'                  => $host,
+//			'order_date'              => $order_date,
+//			'meta_data'               => $formatted_meta_data,
+//			'product_height'          => $item_Size,
+//			'product_name'            => $productName,
+//			'reduce_height'           => $reduce_height,
+//			'product_cat'             => $product_catSlug,
+//			'product_catName'         => $product_catName,
+//			'tradewinds_quickship'    => $tradewinds_quickship,
+//			'product_sku'             => $item_sku,
+//			'order_status'            => $order_status,
+//			'custom_color_match'      => $custom_color_match,
+//			//'order_summery'           => $order_summery,
+//		] );
 
 	}// End test_order_data
 
