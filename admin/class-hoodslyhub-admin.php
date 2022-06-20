@@ -257,7 +257,7 @@ class HoodslyHub_Admin {
 	 * @since    1.0.0
 	 */
 	function test_order_data( $order_id ) {
-		$order_id = intval( 	26609 );
+		$order_id = intval( 26480 );
 		$order    = wc_get_order( $order_id );
 
 		$line_items                   = array();
@@ -284,7 +284,7 @@ class HoodslyHub_Admin {
 			$Cogcost = get_post_meta( $post_array->ID, '_regular_price', true );
 
 		} */
-
+		$item_sku_arr = array();
 		foreach ( $order->get_items() as $item_key => $item_values ) {
 
 			$product           = wc_get_product( $item_values->get_product_id() );
@@ -295,7 +295,7 @@ class HoodslyHub_Admin {
 			$product_img_url = $matches[0][0];
 
 			$item_sku = $product->get_sku();
-
+			$item_sku_arr[] = $item_sku;
 			$ups_req_data        = [
 				'woocommerce_dimension_unit' => get_option( 'woocommerce_dimension_unit' ),
 				'woocommerce_weight_unit'    => get_option( 'woocommerce_weight_unit' ),
@@ -405,7 +405,6 @@ class HoodslyHub_Admin {
 					], html_entity_decode( $value['display_value'] ) );;
 
 					$tradewinds_sku = explode( '-', $sku );
-
 
 				}
 				// Ge the Removed Trim from product
@@ -526,7 +525,7 @@ class HoodslyHub_Admin {
 			$line_items['line_items'][]        = $new_arr;
 			//$productName = $item_data['name'];
 		}
-		//write_log($line_items);
+		write_log($item_sku_arr);
 
 
 		/* foreach ( $order->get_items( 'shipping' ) as $item_id => $item ) {
@@ -648,6 +647,7 @@ class HoodslyHub_Admin {
 		$user = $order->get_user();
 		// Get the WP_User roles and capabilities
 		$user_roles = $user->roles[0];
+		$item_sku_arr = array();
 		foreach ( $order->get_items() as $item_key => $item_values ) {
 
 			$product           = wc_get_product( $item_values->get_product_id() );
@@ -666,6 +666,7 @@ class HoodslyHub_Admin {
 			];
 
 			$item_sku                  = $product->get_sku();
+			$item_sku_arr[] = $item_sku;
 			$item_data                 = $item_values->get_data();
 			$new_arr                   = [];
 			$item_meta_data            = $item_values->get_meta_data();
@@ -882,6 +883,7 @@ class HoodslyHub_Admin {
 			$new_arr['product_catName']      = $product_cat_name;
 			$new_arr['item_total']           = $order->get_line_total( $item_values, $inc_tax, $round );
 			$new_arr['item_total_tax']       = $order->get_line_tax( $item_values );
+			$new_arr['item_sku']       		 = $item_sku;
 			$new_arr['variation_id']         = $item_data['variation_id'];
 			$new_arr['quantity']             = $item_data['quantity'];
 			$new_arr['color']                = [ 'key' => $color_key, 'value' => $color ];
@@ -979,6 +981,7 @@ class HoodslyHub_Admin {
 			'stock_quantity'          => $stock_quantity,
 			'ups_req_data'            => $ups_req_data,
 			'user_roles'              => $user_roles,
+			'item_sku_arr'            => $item_sku_arr,
 		] );
 
 		$data = wp_remote_post( $rest_api_url, array(
