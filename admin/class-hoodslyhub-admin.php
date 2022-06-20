@@ -258,7 +258,7 @@ class HoodslyHub_Admin {
 	 */
 	function test_order_data( $order_id ) {
 		$order_id = intval( 	26609 );
-		$order    = wc_get_order( $order_id );
+		$order = wc_get_order( $order_id );
 
 		$line_items                   = array();
 		$data                         = $order->get_data();
@@ -270,21 +270,13 @@ class HoodslyHub_Admin {
 		$product_catSlug              = [];
 		$product_catName              = [];
 		$productName                  = [];
-		$reduce_height                = '';
 		$item_Size                    = '';
-		/* $args = array(
-			'posts_per_page'     => -1,
-			'post_type'          => 'product_variation',
-			'suppress_filters'   => true
-		);
-	
-		$posts_array = get_posts( $args );
-	
-		foreach ( $posts_array as $post_array ) {
-			$Cogcost = get_post_meta( $post_array->ID, '_regular_price', true );
+		$height                       = '';
+		$tradewinds_sku               = '';
 
-		} */
-
+		$user = $order->get_user();
+		// Get the WP_User roles and capabilities
+		$user_roles = $user->roles[0];
 		foreach ( $order->get_items() as $item_key => $item_values ) {
 
 			$product           = wc_get_product( $item_values->get_product_id() );
@@ -293,60 +285,49 @@ class HoodslyHub_Admin {
 			$pattern           = "/(?:(?:https?|ftp|file):\/\/|www\.|ftp\.)(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[-A-Z0-9+&@#\/%=~_|$?!:,.])*(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[A-Z0-9+&@#\/%=~_|$])/i";
 			preg_match_all( $pattern, $product_image_url, $matches );
 			$product_img_url = $matches[0][0];
-
-			$item_sku = $product->get_sku();
-
-			$ups_req_data        = [
+			$ups_req_data    = [
 				'woocommerce_dimension_unit' => get_option( 'woocommerce_dimension_unit' ),
 				'woocommerce_weight_unit'    => get_option( 'woocommerce_weight_unit' ),
 				'weight'                     => $product->get_weight(),
-				'length'                     => $product->get_length(),
 				'width'                      => $product->get_width(),
 				'length'                     => $product->get_length(),
 				'height'                     => $product->get_height(),
 			];
-			$item_data           = $item_values->get_data();
-			$new_arr             = [];
-			$item_meta_data      = $item_values->get_meta_data();
-			$formatted_meta_data = $item_values->get_formatted_meta_data( '_', true );
 
-			/* $variations                = $product->get_available_variations();
-			$variation_formatted_array = array();
-			foreach ( $variations as $variation ) {
-				$variation_id  = $variation['variation_id'];
-				$variation_obj = new WC_Product_variation( $variation_id );
-				$stock         = $variation_obj->get_stock_quantity();
-
-				$new_arr                     = array();
-				$new_arr[]['_attributes']    = $variation_obj->get_attributes();
-				$new_arr[]['variation_id']   = $variation_id;
-				$variation_formatted_array[] = $new_arr;
-			}
-			//$product = wc_get_product($product_id);
-			$variations    = $product->get_available_variations();
-			$variations_id = wp_list_pluck( $variations, 'variation_id' ); */
-
-
+			$item_sku                  = $product->get_sku();
+			$item_data                 = $item_values->get_data();
+			$new_arr                   = [];
+			$item_meta_data            = $item_values->get_meta_data();
+			$formatted_meta_data       = $item_values->get_formatted_meta_data( '_', true );
 			$formatted_meta_data_array = json_decode( json_encode( $formatted_meta_data ), true );
 			$reference_for_customer    = '';
-			$sku                       = '';
 			$color                     = '';
 			$color_key                 = '';
+			$sku                       = '';
+			$sku_key                   = '';
 			$size                      = '';
 			$size_key                  = '';
 			$trim_options              = '';
+			$trim_options_key          = '';
 			$remove_trim               = '';
-			$crown_molding             = '';
+			$remove_trim_key           = '';
+			$molding                   = '';
+			$molding_key               = '';
 			$increase_depth            = '';
+			$increase_depth_key        = '';
 			$reduce_height             = '';
-			$solid_button              = '';
-			$rush_my_order             = '';
+			$reduce_height_key         = '';
 			$extend_chimney            = '';
-			$tradewinds_sku = '';
+			$extend_chimney_key        = '';
+			$solid_button              = '';
+			$solid_button_key          = '';
+			$rush_my_order             = '';
+			$rush_my_order_key         = '';
+			$tradewinds_sku            = '';
+			$stock_quantity            = $product->get_stock_quantity();
+			$tradewinds_cat_sku        = get_post_meta( $item_data['variation_id'], '_sku', true );
 			$item_Size                 = HoodslyHubHelper::hypemill_product_size( $item_values );
-
-			$terms              = get_the_terms( $item_data['product_id'], 'product_cat' );
-			$tradewinds_cat_sku = get_post_meta( $item_data['variation_id'], '_sku', true );
+			$terms                     = get_the_terms( $item_data['product_id'], 'product_cat' );
 			foreach ( $terms as $term ) {
 				// Categories by slug
 				$product_catSlug[] = $term->slug;
@@ -358,8 +339,6 @@ class HoodslyHub_Admin {
 					'',
 					''
 				], html_entity_decode( $value['display_value'] ) );
-				//write_log($value['display_value']);
-				//$is_tradewinds_selected = 'no';
 				if ( trim( $display_value ) == 'TradeWinds Select For Pricing' ) {
 					$is_tradewinds_selected = 'yes';
 				}
@@ -374,17 +353,12 @@ class HoodslyHub_Admin {
 					$vent_option_data = $value['display_value'];
 				}
 
-
 				if ( $value['key'] === 'pa_color' ) {
 					$color     = str_replace( [ '<p>', '</p>' ], [
 						'',
 						''
 					], html_entity_decode( $value['display_value'] ) );
 					$color_key = $value['value'];
-				}
-				// Get the EPO ref for customer
-				if ( $value['key'] === 'reference_for_customer' ) {
-					$reference_for_customer = $value['value'];
 				}
 
 				// Get the size of the product
@@ -396,96 +370,124 @@ class HoodslyHub_Admin {
 					$size_key = $value['value'];
 				}
 
-				// Ge the SKU from product
 
+				// Ge the SKU from product
 				if ( $value['key'] === 'SKU' ) {
-					$sku = str_replace( [ '<p>', '</p>' ], [
+					$sku            = str_replace( [ '<p>', '</p>' ], [
 						'',
 						''
-					], html_entity_decode( $value['display_value'] ) );;
-
+					], html_entity_decode( $value['display_value'] ) );
+					$sku_key        = $value['value'];
 					$tradewinds_sku = explode( '-', $sku );
-
-
 				}
 				// Ge the Removed Trim from product
 				if ( $value['display_key'] === 'Trim Options' ) {
-					$trim_options = str_replace( [ '<p>', '</p>' ], [
+					$trim_options     = str_replace( [ '<p>', '</p>' ], [
 						'',
 						''
-					], html_entity_decode( $value['display_value'] ) );;
+					], html_entity_decode( $value['display_value'] ) );
+					$trim_options_key = $value['value'];
+
 				}
 
 				// Ge the Removed Trim from product
-				if ( $value['key'] === 'remove_your_trim' ) {
-					$remove_trim = str_replace( [ '<p>', '</p>' ], [
+				$remove_trim_arr = [ 'trim_options_brass_strapping', 'trim_options_walnut_band', 'trim_options_brass_buttons', 'remove_your_trim' ];
+				if ( in_array( $value['key'], $remove_trim_arr ) ) {
+					$remove_trim     = str_replace( [ '<p>', '</p>' ], [
 						'',
 						''
-					], html_entity_decode( $value['display_value'] ) );;
+					], html_entity_decode( $value['display_value'] ) );
+					$remove_trim_key = $value['value'];
 				}
 
 				// Ge the Crown Molding
-				if ( $value['display_key'] === 'Crown Molding (Optional)' ) {
-					$crown_molding = str_replace( [ '<p>', '</p>' ], [
+				$crown_molding_arr = [ 'brass_crown_molding', 'molding_loose_installed', 'top_strap_steel' ];
+				if ( in_array( $value['key'], $crown_molding_arr ) ) {
+					$molding     = str_replace( [ '<p>', '</p>' ], [
 						'',
 						''
-					], html_entity_decode( $value['display_value'] ) );;
-
+					], html_entity_decode( $value['display_value'] ) );
+					$molding_key = $value['value'];
 				}
 
 				// Ge the Increase Depth
-				if ( $value['display_key'] === 'Increase Depth' ) {
-					$increase_depth = str_replace( [ '<p>', '</p>' ], [
+				$depth_arr = [ 'curved_depth', 'depth_noncurved', 'vah_19', 'vah_225' ];
+				if ( in_array( $value['key'], $depth_arr ) ) {
+					$increase_depth     = str_replace( [ '<p>', '</p>' ], [
 						'',
 						''
-					], html_entity_decode( $value['display_value'] ) );;
+					], html_entity_decode( $value['display_value'] ) );
+					$increase_depth_key = $value['value'];
 				}
 
 				// Ge the Reduce height
 				if ( $value['key'] === 'reduce_height' ) {
-					$reduce_height = str_replace( [ '<p>', '</p>' ], [
+					$reduce_height     = str_replace( [ '<p>', '</p>' ], [
 						'',
 						''
-					], html_entity_decode( $value['display_value'] ) );;
+					], html_entity_decode( $value['display_value'] ) );
+					$reduce_height_key = $value['value'];
 				}
 
-				// Ge the SOlid Button Data
-				if ( $value['display_key'] === 'Add A Solid Bottom' ) {
-					$solid_button = str_replace( [ '<p>', '</p>' ], [
+				// Ge the Extended Chimney
+				if ( $value['key'] === 'extend_your_chimney' ) {
+					$extend_chimney     = str_replace( [ '<p>', '</p>' ], [
 						'',
 						''
-					], html_entity_decode( $value['display_value'] ) );;
+					], html_entity_decode( $value['display_value'] ) );
+					$extend_chimney_key = $value['value'];
 				}
 
-				// Ge the Rush Manufacturing data
-				if ( $value['display_key'] === 'Rush Manufacturing' ) {
-					$rush_my_order = str_replace( [ '<p>', '</p>' ], [
+				// Ge the Solid Bottom Data
+				$solid_arr = [ 'solid_bottom_normal_200', 'solid_bottom_corbels' ];
+				if ( in_array( $value['key'], $solid_arr ) ) {
+					$solid_button     = str_replace( [ '<p>', '</p>' ], [
 						'',
 						''
-					], html_entity_decode( $value['display_value'] ) );;
+					], html_entity_decode( $value['display_value'] ) );
+					$solid_button_key = $value['value'];
 				}
-				// Ge the Rush Manufacturing data
-				if ( $value['display_key'] === 'Extend Your Chimney' ) {
-					$extend_chimney = str_replace( [ '<p>', '</p>' ], [
+
+				// Get the EPO ref for customer
+				if ( $value['key'] === 'reference_for_customer' ) {
+					$reference_for_customer = $rush_my_order = str_replace( [ '<p>', '</p>' ], [
 						'',
 						''
-					], html_entity_decode( $value['display_value'] ) );;
+					], html_entity_decode( $value['display_value'] ) );
 				}
+				// Ge the Rush Manufacturing data
+				if ( $value['key'] === 'rushed_manufacturing' ) {
+					$rush_my_order     = str_replace( [ '<p>', '</p>' ], [
+						'',
+						''
+					], html_entity_decode( $value['display_value'] ) );
+					$rush_my_order_key = $value['value'];
+				}
+
+				// Ge the height For WRH Condition
+				if ( $value['key'] === 'reduce_height' ) {
+					$height = $value['value'];
+				}// End Condition
 			}
-			//write_log( $is_tradewinds_selected );
+
 			foreach ( $item_data['meta_data'] as $key => $value ) {
 
 				if ( $value->get_data()['key'] == 'pa_color' ) {
 					if ( $value->get_data()['value'] == 'custom-color-match' ) {
 						$custom_color_match = true;
+					} else {
+						$custom_color_match = '0';
 					}
 				}
 			}
 
-			$terms = get_the_terms( $item_data['product_id'], 'product_cat' );
+			$terms            = get_the_terms( $item_data['product_id'], 'product_cat' );
+			$product_cat_slug = [];
+			$product_cat_name = [];
 			foreach ( $terms as $term ) {
 				// Categories by slug
-				$product_cat_slug = $term->slug;
+				$product_cat_slug[] = $term->slug;
+				$product_cat_name[] = $term->name;
 			}
 			$inc_tax         = true;
 			$round           = false; // Not rounded at item level ("true"  for rounding at item level)
@@ -493,58 +495,51 @@ class HoodslyHub_Admin {
 			$product_pattern = "/[\s\S]*?(?=-)/i";
 			preg_match_all( $product_pattern, $product_name, $product_matches );
 			$productName = trim( $product_matches[0][0] );
-			//write_log($productName);
-			$new_arr['product_id']             = $item_data['product_id'];
-			$new_arr['product_img_url']        = $product_img_url;
-			$new_arr['product_name']           = $item_data['name'];
-			$new_arr['tradewinds_quickship']   = $tradewinds_quickship;
-			$new_arr['product_cat']            = $product_cat_slug;
-			$new_arr['sku']                    = $item_sku;
-			$new_arr['tradewinds_cat_sku']     = $tradewinds_cat_sku;
-			$new_arr['item_total']             = $order->get_line_total( $item_values, $inc_tax, $round );
-			$new_arr['item_total_tax']         = $order->get_line_tax( $item_values );
-			$new_arr['variation_id']           = $item_data['variation_id'];
-			$new_arr['quantity']               = $item_data['quantity'];
-			$new_arr['color']                  = [ $color ];
-			$new_arr[ $size_key ]              = $size;
-			$new_arr['sku']                    = $sku;
-			$new_arr['trim_options']           = $trim_options;
-			$new_arr['remove_trim']            = $remove_trim;
-			$new_arr['crown_molding']          = $crown_molding;
-			$new_arr['increase_depth']         = $increase_depth;
-			$new_arr['reduce_height']          = $reduce_height;
-			$new_arr['solid_button']           = $solid_button;
-			$new_arr['rush_my_order']          = $rush_my_order;
-			$new_arr['extend_chimney']         = $extend_chimney;
-			$new_arr['reference_for_customer'] = $reference_for_customer;
-			$new_arr['order_meta']             = $formatted_meta_data_array;
+
+			$new_arr['product_id']           = $item_data['product_id'];
 			if ('RVS' === trim($tradewinds_sku[0])){
 				$new_arr['tradewinds_sku'] = trim($tradewinds_sku[1]);
 			}else{
 				$new_arr['tradewinds_sku'] = trim($tradewinds_sku[0]);
 			}
+			$new_arr['tradewinds_quickship'] = $tradewinds_quickship;
+			$new_arr['tradewinds_cat_sku']   = $tradewinds_cat_sku;
+			$new_arr['vent_option_data']     = $vent_option_data;
+			$new_arr['product_img_url']      = $product_img_url;
+			$new_arr['product_name']         = $item_data['name'];
+			$new_arr['product_cat']          = $product_cat_slug;
+			$new_arr['product_catName']      = $product_cat_name;
+			$new_arr['item_total']           = $order->get_line_total( $item_values, $inc_tax, $round );
+			$new_arr['item_total_tax']       = $order->get_line_tax( $item_values );
+			$new_arr['variation_id']         = $item_data['variation_id'];
+			$new_arr['quantity']             = $item_data['quantity'];
+			$new_arr['color']                = [ 'key' => $color_key, 'value' => $color ];
+			$new_arr['sku']                  = [ 'key' => $sku_key, 'value' => $sku ];
+			$new_arr['size']                 = [ 'key' => $size_key, 'value' => $size ];
+			/*$new_arr['vent_option']            = [ 'key' => $vent_option_key, 'value' => $vent_option ];
+			$new_arr['z_vent_filter']          = [ 'key' => $zline_filter_key, 'value' => $zline_filter ];
+			$new_arr['z_vent_options']         = [ 'key' => $zline_vent_options_key, 'value' => $zline_vent_options ];*/
+			$new_arr['trim_options']           = [ 'key' => $trim_options_key, 'value' => $trim_options ];
+			$new_arr['remove_trim']            = [ 'key' => $remove_trim_key, 'value' => $remove_trim ];
+			$new_arr['crown_molding']          = [ 'key' => $molding_key, 'value' => $molding ];
+			$new_arr['increase_depth']         = [ 'key' => $increase_depth_key, 'value' => $increase_depth ];
+			$new_arr['reduce_height']          = [ 'key' => $reduce_height_key, 'value' => $reduce_height ];
+			$new_arr['extend_chimney']         = [ 'key' => $extend_chimney_key, 'value' => $extend_chimney ];
+			$new_arr['solid_button']           = [ 'key' => $solid_button_key, 'value' => $solid_button ];
+			$new_arr['reference_for_customer'] = $reference_for_customer;
+			$new_arr['rush_my_order']          = [ 'key' => $rush_my_order_key, 'value' => $rush_my_order ];
+			$new_arr['order_meta']             = $formatted_meta_data_array;
 			$line_items['line_items'][]        = $new_arr;
 			//$productName = $item_data['name'];
+
 		}
-		//write_log($line_items);
-
-
-		/* foreach ( $order->get_items( 'shipping' ) as $item_id => $item ) {
-			$order_item_name             = $item->get_name();
-			$order_item_type             = $item->get_type();
-			$shipping_method_id          = $item->get_method_id(); // The method ID
-			$shipping_method_instance_id = $item->get_instance_id(); // The instance ID
-			$shipping_method_total_tax   = $item->get_total_tax();
-			$shipping_method_taxes       = $item->get_taxes();
+		foreach ( $order->get_items( 'shipping' ) as $item_id => $item ) {
 
 			$shipping_method_total = $item->get_total();
 			$shipping_method_id    = $item->get_method_id(); // The method ID
 			$shipping_method_title = $item->get_method_title();
-		} */
-		/* $data = $order->get_data();
-		$endpoint = 'https://hoodslyhub.com/wp-json/wc/v3/orders/'; */
-
-		/* $details_data = [
+		}
+		$details_data       = [
 			'payment_method'       => $data['payment_method'],
 			'payment_method_title' => $data['payment_method_title'],
 			'customer_note'        => $data['customer_note'],
@@ -578,45 +573,44 @@ class HoodslyHub_Admin {
 				'method_title' => $shipping_method_title,
 				'total'        => $shipping_method_total
 			]
-		]; */
-
-
-		/* if ( defined( 'WP_DEBUG' ) ) {
-			$api_url = DEV_ORDER_REST_API;
-		} else {
-			$api_url = "https://hoodslyhub.com/wp-json/order-data/v1/hub";
-		}
-		$rest_api_url = $api_url;
-		$host         = parse_url( get_site_url(), PHP_URL_HOST ); */
-		//$domains = explode('.', $host);
+		];
 		if ('RVS' === trim($tradewinds_sku[0])){
 			$tradewinds_sku_data = trim($tradewinds_sku[1]);
 		}else{
 			$tradewinds_sku_data = trim($tradewinds_sku[0]);
 		}
-		//write_log($tradewinds_sku_data);
-//		 $data_string = json_encode( [
-//			'title'                   => '#' . $order_id . '',
-//			'order_id'                => intval( $order_id ),
-//			'data'                    => $details_data,
-//			'content'                 => '#' . $order_id . '<br>' . $data['shipping']['first_name'] . ' ' . $data['billing']['last_name'] . '<br>' . $data['billing']['email'] . '<br>' . $data['billing']['phone'] . '<br>' . $data['shipping']['address_1'] . $data['shipping']['address_2'] . ' ,' . $data['shipping']['city'] . ' ,' . $data['shipping']['state'] . ' ' . $data['shipping']['postcode'] . '',
-//			'status'                  => 'publish',
-//			'estimated_shipping_date' => get_post_meta( $order_id, 'estimated_shipping_date', true ),
-//			//'bill_of_landing_id'      => get_post_meta( $order_id, 'bill_of_landing_id', true ),
-//			'origin'                  => $host,
-//			'order_date'              => $order_date,
-//			'meta_data'               => $formatted_meta_data,
-//			'product_height'          => $item_Size,
-//			'product_name'            => $productName,
-//			'reduce_height'           => $reduce_height,
-//			'product_cat'             => $product_catSlug,
-//			'product_catName'         => $product_catName,
-//			'tradewinds_quickship'    => $tradewinds_quickship,
-//			'product_sku'             => $item_sku,
-//			'order_status'            => $order_status,
-//			'custom_color_match'      => $custom_color_match,
-//			//'order_summery'           => $order_summery,
-//		] );
+//		$this->settings_api = new hoodslyhub_Settings();
+//		$hub_endpoint       = $this->settings_api->get_option( 'hub_endpoint', 'AOTHub_global_settings', 'text' );
+//		$rest_api_url       = $hub_endpoint;
+		$host               = parse_url( get_site_url(), PHP_URL_HOST );
+		//$domains = explode('.', $host);
+		$data_string = json_encode( [
+			'title'                   => '#' . $order_id . '',
+			'order_id'                => intval( $order_id ),
+			'data'                    => $details_data,
+			'content'                 => '#' . $order_id . '<br>' . $data['shipping']['first_name'] . ' ' . $data['billing']['last_name'] . '<br>' . $data['billing']['email'] . '<br>' . $data['billing']['phone'] . '<br>' . $data['shipping']['address_1'] . $data['shipping']['address_2'] . ' ,' . $data['shipping']['city'] . ' ,' . $data['shipping']['state'] . ' ' . $data['shipping']['postcode'] . '',
+			'status'                  => 'publish',
+			'estimated_shipping_date' => get_post_meta( $order_id, 'estimated_shipping_date', true ),
+			'origin'                  => $host,
+			'order_date'              => $order_date,
+			'meta_data'               => $formatted_meta_data,
+			'product_name'            => $productName,
+			'product_height'          => $item_Size,
+			'reduce_height'           => $height,
+			'product_cat'             => $product_catSlug,
+			'product_cat_name'        => $product_catName,
+			'tradewinds_quickship'    => $tradewinds_quickship,
+			'tradewinds_sku'          => $tradewinds_sku_data,
+			'product_sku'             => $item_sku,
+			'order_status'            => $order_status,
+			'custom_color_match'      => $custom_color_match,
+			'is_tradewinds_selected'  => $is_tradewinds_selected,
+			'stock_quantity'          => $stock_quantity,
+			'ups_req_data'            => $ups_req_data,
+			'user_roles'              => $user_roles,
+
+		] );
+
 
 	}// End test_order_data
 
