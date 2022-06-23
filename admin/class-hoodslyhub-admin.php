@@ -1210,10 +1210,16 @@ class HoodslyHub_Admin {
 		$line_items['order_total']    = $order->get_total();
 		$line_items['total_quantity'] = $order->get_item_count();
 		$product_catSlug              = array();
-		$product_catNmae              = array();
+		$product_catName              = array();
 		$productName                  = array();
 		$item_Size                    = '';
 		$height                       = '';
+		$tradewinds_sku               = '';
+
+		$user = $order->get_user();
+		// Get the WP_User roles and capabilities
+		$user_roles   = $user->roles[0];
+		$item_sku_arr = array();
 		foreach ( $order->get_items() as $item_key => $item_values ) {
 
 			$product           = wc_get_product( $item_values->get_product_id() );
@@ -1222,8 +1228,17 @@ class HoodslyHub_Admin {
 			$pattern           = '/(?:(?:https?|ftp|file):\/\/|www\.|ftp\.)(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[-A-Z0-9+&@#\/%=~_|$?!:,.])*(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[A-Z0-9+&@#\/%=~_|$])/i';
 			preg_match_all( $pattern, $product_image_url, $matches );
 			$product_img_url = $matches[0][0];
+			$ups_req_data    = array(
+				'woocommerce_dimension_unit' => get_option( 'woocommerce_dimension_unit' ),
+				'woocommerce_weight_unit'    => get_option( 'woocommerce_weight_unit' ),
+				'weight'                     => $product->get_weight(),
+				'width'                      => $product->get_width(),
+				'length'                     => $product->get_length(),
+				'height'                     => $product->get_height(),
+			);
 
 			$item_sku                  = $product->get_sku();
+			$item_sku_arr[]            = $item_sku;
 			$item_data                 = $item_values->get_data();
 			$new_arr                   = array();
 			$item_meta_data            = $item_values->get_meta_data();
@@ -1252,16 +1267,40 @@ class HoodslyHub_Admin {
 			$solid_button_key          = '';
 			$rush_my_order             = '';
 			$rush_my_order_key         = '';
-
-			$item_Size = HoodslyHubHelper::hypemill_product_size( $item_values );
-			$terms     = get_the_terms( $item_data['product_id'], 'product_cat' );
+			$tradewinds_sku            = '';
+			$stock_quantity            = $product->get_stock_quantity();
+			$tradewinds_cat_sku        = get_post_meta( $item_data['variation_id'], '_sku', true );
+			$item_Size                 = HoodslyHubHelper::hypemill_product_size( $item_values );
+			$terms                     = get_the_terms( $item_data['product_id'], 'product_cat' );
 			foreach ( $terms as $term ) {
 				// Categories by slug
 				$product_catSlug[] = $term->slug;
-				$product_catNmae[] = $term->name;
+				$product_catName[] = $term->name;
 			}
 
 			foreach ( $formatted_meta_data_array as $value ) {
+				$display_value = str_replace(
+					array( '<p>', '</p>' ),
+					array(
+						'',
+						'',
+					),
+					html_entity_decode( $value['display_value'] )
+				);
+				if ( trim( $display_value ) == 'TradeWinds Select For Pricing' ) {
+					$is_tradewinds_selected = 'yes';
+				}
+
+				if ( $value['display_value'] == 'No Vent' ) {
+					$tradewinds_quickship = 'no';
+				} else {
+					$tradewinds_quickship = $value['display_value'];
+				}
+
+				if ( $value['display_key'] == 'Ventilation Options' ) {
+					$vent_option_data = $value['display_value'];
+				}
+
 				if ( $value['key'] === 'pa_color' ) {
 					$color     = str_replace(
 						array( '<p>', '</p>' ),
@@ -1289,7 +1328,7 @@ class HoodslyHub_Admin {
 
 				// Ge the SKU from product
 				if ( $value['key'] === 'SKU' ) {
-					$sku     = str_replace(
+					$sku            = str_replace(
 						array( '<p>', '</p>' ),
 						array(
 							'',
@@ -1297,7 +1336,8 @@ class HoodslyHub_Admin {
 						),
 						html_entity_decode( $value['display_value'] )
 					);
-					$sku_key = $value['value'];
+					$sku_key        = $value['value'];
+					$tradewinds_sku = explode( '-', $sku );
 				}
 				// Ge the Removed Trim from product
 				if ( $value['display_key'] === 'Trim Options' ) {
@@ -1430,39 +1470,54 @@ class HoodslyHub_Admin {
 				if ( $value->get_data()['key'] == 'pa_color' ) {
 					if ( $value->get_data()['value'] == 'custom-color-match' ) {
 						$custom_color_match = true;
+					} else {
+						$custom_color_match = '0';
 					}
 				}
 			}
 
-			$terms = get_the_terms( $item_data['product_id'], 'product_cat' );
+			$terms            = get_the_terms( $item_data['product_id'], 'product_cat' );
+			$product_cat_slug = array();
+			$product_cat_name = array();
 			foreach ( $terms as $term ) {
 				// Categories by slug
-				$product_cat_slug = $term->slug;
+				$product_cat_slug[] = $term->slug;
+				$product_cat_name[] = $term->name;
 			}
 			$inc_tax         = true;
 			$round           = false; // Not rounded at item level ("true"  for rounding at item level)
 			$product_name    = $item_values['name'];
 			$product_pattern = '/[\s\S]*?(?=-)/i';
 			preg_match_all( $product_pattern, $product_name, $product_matches );
-			$productName[] = trim( $product_matches[0][0] );
+			$productName = trim( $product_matches[0][0] );
 
-			$new_arr['product_id']      = $item_data['product_id'];
-			$new_arr['product_img_url'] = $product_img_url;
-			$new_arr['product_name']    = $item_data['name'];
-			$new_arr['product_cat']     = $product_cat_slug;
-			$new_arr['item_total']      = $order->get_line_total( $item_values, $inc_tax, $round );
-			$new_arr['item_total_tax']  = $order->get_line_tax( $item_values );
-			$new_arr['variation_id']    = $item_data['variation_id'];
-			$new_arr['quantity']        = $item_data['quantity'];
-			$new_arr['color']           = array(
+			$new_arr['product_id'] = $item_data['product_id'];
+			if ( 'RVS' === trim( $tradewinds_sku[0] ) ) {
+				$new_arr['tradewinds_sku'] = trim( $tradewinds_sku[1] );
+			} else {
+				$new_arr['tradewinds_sku'] = trim( $tradewinds_sku[0] );
+			}
+			$new_arr['tradewinds_quickship'] = $tradewinds_quickship;
+			$new_arr['tradewinds_cat_sku']   = $tradewinds_cat_sku;
+			$new_arr['vent_option_data']     = $vent_option_data;
+			$new_arr['product_img_url']      = $product_img_url;
+			$new_arr['product_name']         = $item_data['name'];
+			$new_arr['product_cat']          = $product_cat_slug;
+			$new_arr['product_catName']      = $product_cat_name;
+			$new_arr['item_total']           = $order->get_line_total( $item_values, $inc_tax, $round );
+			$new_arr['item_total_tax']       = $order->get_line_tax( $item_values );
+			$new_arr['item_sku']             = $item_sku;
+			$new_arr['variation_id']         = $item_data['variation_id'];
+			$new_arr['quantity']             = $item_data['quantity'];
+			$new_arr['color']                = array(
 				'key'   => $color_key,
 				'value' => $color,
 			);
-			$new_arr['sku']             = array(
+			$new_arr['sku']                  = array(
 				'key'   => $sku_key,
 				'value' => $sku,
 			);
-			$new_arr['size']            = array(
+			$new_arr['size']                 = array(
 				'key'   => $size_key,
 				'value' => $size,
 			);
@@ -1504,6 +1559,7 @@ class HoodslyHub_Admin {
 			);
 			$new_arr['order_meta']             = $formatted_meta_data_array;
 			$line_items['line_items'][]        = $new_arr;
+			//$productName = $item_data['name'];
 
 		}
 		foreach ( $order->get_items( 'shipping' ) as $item_id => $item ) {
@@ -1512,7 +1568,7 @@ class HoodslyHub_Admin {
 			$shipping_method_id    = $item->get_method_id(); // The method ID
 			$shipping_method_title = $item->get_method_title();
 		}
-		$details_data              = array(
+		$details_data = array(
 			'payment_method'       => $data['payment_method'],
 			'payment_method_title' => $data['payment_method_title'],
 			'customer_note'        => $data['customer_note'],
@@ -1547,10 +1603,15 @@ class HoodslyHub_Admin {
 				'total'        => $shipping_method_total,
 			),
 		);
-		$this->settings_api        = new hoodslyhub_Settings();
-		$hub_order_status_endpoint = $this->settings_api->get_option( 'hub_order_status_endpoint', 'AOTHub_global_settings', 'text' );
-		$rest_api_url              = $hub_order_status_endpoint;
-		$host                      = parse_url( get_site_url(), PHP_URL_HOST );
+		if ( 'RVS' === trim( $tradewinds_sku[0] ) ) {
+			$tradewinds_sku_data = trim( $tradewinds_sku[1] );
+		} else {
+			$tradewinds_sku_data = trim( $tradewinds_sku[0] );
+		}
+		$this->settings_api = new hoodslyhub_Settings();
+		$hub_endpoint       = $this->settings_api->get_option( 'hub_endpoint', 'AOTHub_global_settings', 'text' );
+		$rest_api_url       = $hub_endpoint;
+		$host               = parse_url( get_site_url(), PHP_URL_HOST );
 		//$domains = explode('.', $host);
 		$data_string = json_encode(
 			array(
@@ -1567,11 +1628,17 @@ class HoodslyHub_Admin {
 				'product_height'          => $item_Size,
 				'reduce_height'           => $height,
 				'product_cat'             => $product_catSlug,
-				'product_cat_name'        => $product_catNmae,
+				'product_cat_name'        => $product_catName,
+				'tradewinds_quickship'    => $tradewinds_quickship,
+				'tradewinds_sku'          => $tradewinds_sku_data,
 				'product_sku'             => $item_sku,
 				'order_status'            => $order_status,
 				'custom_color_match'      => $custom_color_match,
-				'shipping_state'          => $data['shipping']['state'],
+				'is_tradewinds_selected'  => $is_tradewinds_selected,
+				'stock_quantity'          => $stock_quantity,
+				'ups_req_data'            => $ups_req_data,
+				'user_roles'              => $user_roles,
+				'item_sku_arr'            => $item_sku_arr,
 			)
 		);
 
