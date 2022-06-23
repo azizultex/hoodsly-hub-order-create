@@ -1608,9 +1608,9 @@ class HoodslyHub_Admin {
 		} else {
 			$tradewinds_sku_data = trim( $tradewinds_sku[0] );
 		}
-		$this->settings_api = new hoodslyhub_Settings();
-		$hub_endpoint       = $this->settings_api->get_option( 'hub_endpoint', 'AOTHub_global_settings', 'text' );
-		$rest_api_url       = $hub_endpoint;
+		$this->settings_api        = new hoodslyhub_Settings();
+		$hub_order_status_endpoint = $this->settings_api->get_option( 'hub_order_status_endpoint', 'AOTHub_global_settings', 'text' );
+		$rest_api_url              = $hub_order_status_endpoint;
 		$host               = parse_url( get_site_url(), PHP_URL_HOST );
 		//$domains = explode('.', $host);
 		$data_string = json_encode(
