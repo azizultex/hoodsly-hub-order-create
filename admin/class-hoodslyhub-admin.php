@@ -1169,7 +1169,7 @@ class HoodslyHub_Admin {
 		if ('diamondhoods.com' === $host){
 			$orderid = 'USCD-'.intval( $order_id );
 		}else{
-			$orderid = intval( $order_id );
+			$orderid = 'USCD-'.intval( $order_id );;
 		}
 		$data_string = json_encode(
 			array(
