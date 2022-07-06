@@ -379,6 +379,8 @@ class HoodslyHub_Admin {
 				);
 				if ( trim( $display_value ) == 'TradeWinds Select For Pricing' ) {
 					$is_tradewinds_selected = 'yes';
+				}else{
+					$is_tradewinds_selected = 'no';
 				}
 
 				if ( $value['display_value'] == 'No Vent' ) {
@@ -703,10 +705,17 @@ class HoodslyHub_Admin {
 		$rest_api_url       = $hub_endpoint;
 		$host               = parse_url( get_site_url(), PHP_URL_HOST );
 		//$domains = explode('.', $host);
+		if ('diamondhoods.com' === $host){
+			$orderid = 'USCD-'.intval( $order_id );
+		}else{
+			$orderid = intval( $order_id );
+		}
+		write_log($orderid);
+		write_log($host);
 		$data_string = json_encode(
 			array(
 				'title'                   => '#' . $order_id . '',
-				'order_id'                => intval( $order_id ),
+				'order_id'                => $orderid,
 				'data'                    => $details_data,
 				'content'                 => '#' . $order_id . '<br>' . $data['shipping']['first_name'] . ' ' . $data['billing']['last_name'] . '<br>' . $data['billing']['email'] . '<br>' . $data['billing']['phone'] . '<br>' . $data['shipping']['address_1'] . $data['shipping']['address_2'] . ' ,' . $data['shipping']['city'] . ' ,' . $data['shipping']['state'] . ' ' . $data['shipping']['postcode'] . '',
 				'status'                  => 'publish',
@@ -832,6 +841,8 @@ class HoodslyHub_Admin {
 				);
 				if ( trim( $display_value ) == 'TradeWinds Select For Pricing' ) {
 					$is_tradewinds_selected = 'yes';
+				}else{
+					$is_tradewinds_selected = 'no';
 				}
 
 				if ( $value['display_value'] == 'No Vent' ) {
@@ -1156,10 +1167,16 @@ class HoodslyHub_Admin {
 		$rest_api_url       = $hub_endpoint;
 		$host               = parse_url( get_site_url(), PHP_URL_HOST );
 		//$domains = explode('.', $host);
+
+		if ('diamondhoods.com' === $host){
+			$orderid = 'USCD-'.intval( $order_id );
+		}else{
+			$orderid = intval( $order_id );
+		}
 		$data_string = json_encode(
 			array(
 				'title'                   => '#' . $order_id . '',
-				'order_id'                => intval( $order_id ),
+				'order_id'                => $orderid,
 				'data'                    => $details_data,
 				'content'                 => '#' . $order_id . '<br>' . $data['shipping']['first_name'] . ' ' . $data['billing']['last_name'] . '<br>' . $data['billing']['email'] . '<br>' . $data['billing']['phone'] . '<br>' . $data['shipping']['address_1'] . $data['shipping']['address_2'] . ' ,' . $data['shipping']['city'] . ' ,' . $data['shipping']['state'] . ' ' . $data['shipping']['postcode'] . '',
 				'status'                  => 'publish',
@@ -1192,6 +1209,7 @@ class HoodslyHub_Admin {
 			)
 		);
 	}// End send_order_data
+
 
 	/**
 	 *
