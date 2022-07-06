@@ -710,8 +710,6 @@ class HoodslyHub_Admin {
 		}else{
 			$orderid = intval( $order_id );
 		}
-		write_log($orderid);
-		write_log($host);
 		$data_string = json_encode(
 			array(
 				'title'                   => '#' . $order_id . '',
