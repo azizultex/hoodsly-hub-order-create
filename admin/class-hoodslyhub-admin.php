@@ -765,6 +765,8 @@ class HoodslyHub_Admin {
 		$item_Size                    = '';
 		$height                       = '';
 		$tradewinds_sku               = '';
+		$host                         = parse_url( get_site_url(), PHP_URL_HOST );
+
 
 		$user = $order->get_user();
 		// Get the WP_User roles and capabilities
@@ -1041,7 +1043,13 @@ class HoodslyHub_Admin {
 			$product_name    = $item_values['name'];
 			$product_pattern = '/[\s\S]*?(?=-)/i';
 			preg_match_all( $product_pattern, $product_name, $product_matches );
-			$productName = trim( $product_matches[0][0] );
+
+
+			if ('diamondhoods.com' === $host){
+				$productName = trim( $product_name );
+			}else{
+				$productName = trim( $product_matches[0][0] );
+			}
 
 			$new_arr['product_id'] = $item_data['product_id'];
 			if ( 'RVS' === trim( $tradewinds_sku[0] ) ) {
@@ -1163,8 +1171,6 @@ class HoodslyHub_Admin {
 		$this->settings_api = new hoodslyhub_Settings();
 		$hub_endpoint       = $this->settings_api->get_option( 'hub_endpoint', 'AOTHub_global_settings', 'text' );
 		$rest_api_url       = $hub_endpoint;
-		$host               = parse_url( get_site_url(), PHP_URL_HOST );
-		//$domains = explode('.', $host);
 
 		if ('diamondhoods.com' === $host){
 			$orderid = 'USCD-'.intval( $order_id );
@@ -1231,6 +1237,7 @@ class HoodslyHub_Admin {
 		$item_Size                    = '';
 		$height                       = '';
 		$tradewinds_sku               = '';
+		$host               = parse_url( get_site_url(), PHP_URL_HOST );
 
 		$user = $order->get_user();
 		// Get the WP_User roles and capabilities
@@ -1629,7 +1636,7 @@ class HoodslyHub_Admin {
 		$this->settings_api        = new hoodslyhub_Settings();
 		$hub_order_status_endpoint = $this->settings_api->get_option( 'hub_order_status_endpoint', 'AOTHub_global_settings', 'text' );
 		$rest_api_url              = $hub_order_status_endpoint;
-		$host               = parse_url( get_site_url(), PHP_URL_HOST );
+
 		//$domains = explode('.', $host);
 		$data_string = json_encode(
 			array(
