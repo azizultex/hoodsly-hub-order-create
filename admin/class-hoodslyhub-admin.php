@@ -1289,6 +1289,8 @@ class HoodslyHub_Admin {
 				);
 				if ( trim( $display_value ) == 'TradeWinds Select For Pricing' ) {
 					$is_tradewinds_selected = 'yes';
+				}else{
+					$is_tradewinds_selected = 'no';
 				}
 
 				if ( $value['display_value'] == 'No Vent' ) {
