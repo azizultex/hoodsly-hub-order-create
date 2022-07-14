@@ -1117,7 +1117,7 @@ class HoodslyHub_Admin {
 				'key'   => $rush_my_order_key,
 				'value' => $rush_my_order,
 			);
-			$new_arr['order_meta']             = $formatted_meta_data_array;
+			//$new_arr['order_meta']             = $formatted_meta_data_array;
 			$line_items['line_items'][]        = $new_arr;
 			//$productName = $item_data['name'];
 
@@ -1230,10 +1230,9 @@ class HoodslyHub_Admin {
 		$hub_order_status_endpoint = $this->settings_api->get_option( 'hub_order_status_endpoint', 'AOTHub_global_settings', 'text' );
 		$rest_api_url              = $hub_order_status_endpoint;
 
-		//$domains = explode('.', $host);
 		$data_string = json_encode(
 			array(
-				'order_id'                => intval( $order_id ),
+				'order_id'                => $order_id,
 				'order_status'            => $order_status,
 			)
 		);
